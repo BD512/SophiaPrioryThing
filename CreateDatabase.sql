@@ -1,4 +1,5 @@
-
+DROP TABLE HistoricalItems;
+DROP TABLE ItemsImages;
 CREATE TABLE HistoricalItems (
                                  IDNumber INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                                  Name VARCHAR(50) NOT NULL,
@@ -12,3 +13,5 @@ CREATE TABLE ItemsImages (
                              FOREIGN KEY (IDNumber) REFERENCES HistoricalItems(IDNumber),
                              PRIMARY KEY (IDNumber, ImagePath)
 );
+INSERT INTO HistoricalItems (Name, Category, Description) 
+VALUES ('Silver Candle','Candle','It is a very pretty candle');
