@@ -5,7 +5,7 @@ CREATE TABLE HistoricalItems (
      Name VARCHAR(50) NOT NULL,
      Category VARCHAR(20) NOT NULL,
      Description VARCHAR(1000),
-     Date DATE
+     Date INTEGER
 );
 CREATE TABLE ItemsImages (
      IDNumber INTEGER NOT NULL,
@@ -13,5 +13,12 @@ CREATE TABLE ItemsImages (
      FOREIGN KEY (IDNumber) REFERENCES HistoricalItems(IDNumber),
      PRIMARY KEY (IDNumber, ImagePath)
 );
-INSERT INTO HistoricalItems (Name, Category, Description) 
-VALUES ('Silver Candle','Candle','It is a very pretty candle');
+
+INSERT INTO HistoricalItems (Name, Category, Description)
+VALUES ('Silver candle','Candle','It is a very pretty candle');
+INSERT INTO HistoricalItems (Name, Category, Description, Date)
+VALUES ('Gold candle','Candle','It is a very pretty candle', '01/05/2026');
+INSERT INTO HistoricalItems (Name, Category, Description, Date)
+VALUES ('White cloth', 'Cloth', 'Nice cloth', '17th century');
+
+
