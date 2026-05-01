@@ -4,7 +4,7 @@ import sqlite3
 class DatabaseManager():
     def __init__(self,database = "Priory.db",tables = ("tblHistoricalItem","tblItemImage")):
         # extracts names of tables for consistency
-        self.items_table = tables[0]
+        self.item_table = tables[0]
         self.image_table = tables[1]
         #connects to database
         self.conn = sqlite3.connect(database)
@@ -33,12 +33,15 @@ class DatabaseManager():
         self.conn.commit() # updates changes
 
     # method to insert a new record into historic items table
-    def insert_into_items(self,name="NULL",category="MISC",description = "NULL",year="NULL",confidence=0):
-        for i in name,category,description,year:
-            if i != "NULL":
-                i = f"'{i}'" # adds extra speech marks around strings
-        column_names = self.get_column_names(self.items_table)[1:] # first column is autoincrement
-        self.cursor.execute(f"INSERT INTO {self.image_table} {column_names} \
+    def insert_into_item(self,name="NULL",category="MISC",description = "NULL",year=-1,confidence=0):
+        if year < 0: year = "NULL" # years in AD must be positive
+        temp = [name,category,description]
+        for i in range(len(temp)):
+            if temp[i] != "NULL":
+                temp[i] = f"'{temp[i]}'" # adds extra speech marks around strings
+        name,category,description = temp # unpacks after updating
+        column_names = self.get_column_names(self.item_table)[1:] # first column is autoincrement
+        self.cursor.execute(f"INSERT INTO {self.item_table} {column_names} \
                             VALUES ({name},{category},{description},{year},{confidence});")
         self.conn.commit() # updates changes
 
@@ -47,11 +50,6 @@ class DatabaseManager():
         statement = f"SELECT ImagePath FROM {self.image_table} WHERE ImageId=? ;"
         self.cursor.execute(statement,(id,)) # parameter must be passed in as tuple
         return self.cursor.fetchall()
-
-    # method that commits changes and closes connection before a table object is garbage-collected
-    def __del__(self):
-        self.conn.commit()
-        self.conn.close()
 
     # method to display list of all items - can be sorted differently
     def display_historic_items(self, order_by = "Year"):
@@ -66,3 +64,12 @@ class DatabaseManager():
             """)
         return self.cursor.fetchall()
     
+    # method that commits changes and closes connection before a table object is garbage-collected
+    def __del__(self):
+        self.conn.commit()
+        self.conn.close()
+
+if __name__ == "__main__":
+    d = DatabaseManager()
+    d.insert_into_item(name="Cross",description="Very nice.",category="Cross",year=2000)
+    d.insert_into_image(ID_number=10,path="fake.png")
