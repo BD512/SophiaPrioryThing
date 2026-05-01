@@ -2,7 +2,7 @@ import sqlite3
 
 # class that manages the database (2 tables)
 class DatabaseManager():
-    def __init__(self,database:str,tables:tuple):
+    def __init__(self,database = "Priory.db",tables = ("tblHistoricalItem","tblItemImage")):
         # extracts names of tables for consistency
         self.items_table = tables[0]
         self.image_table = tables[1]
@@ -18,16 +18,6 @@ class DatabaseManager():
         column_names = tuple([column[1] for column in columns_info])
         # the column name is the second piece of data (after the column number)
         return column_names
- 
-    # method to insert a new record into table
-    def insert(self,table:str,data:tuple):
-        column_names = self.get_column_names(table)[1:] # primary key is auto-increment
-        # a tuple of question marks needs to be passed into VALUES
-        question = ""
-        for i in range(len(data)): question+=("?,")
-        question = question[:-1] # remove last comma
-        self.cursor.execute(f"INSERT INTO {table} {column_names} VALUES ({question});",data)
-        self.conn.commit() # updates changes
 
     # method to return any entire column from table
     def get_column(self,table:str,column:str):
@@ -35,18 +25,35 @@ class DatabaseManager():
         self.cursor.execute(statement)
         return self.cursor.fetchall()
     
-    # method to get image_path from image_id
-    # this is used to get both the username and the user_id at different times
+    # method to insert a new record into image table
+    def insert_into_image(self,ID_number:int,path:str):
+        column_names = self.get_column_names(self.image_table)
+        self.cursor.execute(f"INSERT INTO {self.image_table} {column_names} \
+                            VALUES ({ID_number},'{path}');")
+        self.conn.commit() # updates changes
+
+    # method to insert a new record into historic items table
+    def insert_into_items(self,name="NULL",category="MISC",description = "NULL",year="NULL",confidence=0):
+        for i in name,category,description,year:
+            if i != "NULL":
+                i = f"'{i}'" # adds extra speech marks around strings
+        column_names = self.get_column_names(self.items_table)[1:] # first column is autoincrement
+        self.cursor.execute(f"INSERT INTO {self.image_table} {column_names} \
+                            VALUES ({name},{category},{description},{year},{confidence});")
+        self.conn.commit() # updates changes
+        
+    # method to get image path/s from image id
     def get_image_path(self,id:int):
-        statement = f"SELECT ImagePath FROM {self.image_table} WHERE username=? ;"
+        statement = f"SELECT ImagePath FROM {self.image_table} WHERE ImageId=? ;"
         self.cursor.execute(statement,(id,)) # parameter must be passed in as tuple
-        return self.cursor.fetchone()[0]
+        return self.cursor.fetchall()
 
     # method that commits changes and closes connection before a table object is garbage-collected
     def __del__(self):
         self.conn.commit()
         self.conn.close()
 
+    # method to display list of all items - can be sorted differently
     def display_historic_items(self):
         self.cursor.execute("""
             SELECT Name, Category, Description,
