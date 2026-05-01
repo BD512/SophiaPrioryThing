@@ -41,7 +41,7 @@ class DatabaseManager():
         self.cursor.execute(f"INSERT INTO {self.image_table} {column_names} \
                             VALUES ({name},{category},{description},{year},{confidence});")
         self.conn.commit() # updates changes
-        
+
     # method to get image path/s from image id
     def get_image_path(self,id:int):
         statement = f"SELECT ImagePath FROM {self.image_table} WHERE ImageId=? ;"
@@ -54,15 +54,15 @@ class DatabaseManager():
         self.conn.close()
 
     # method to display list of all items - can be sorted differently
-    def display_historic_items(self):
-        self.cursor.execute("""
+    def display_historic_items(self, order_by = "Year"):
+        self.cursor.execute(f"""
             SELECT Name, Category, Description,
             CASE 
                 WHEN Confidence = 1 THEN Year 
                 ELSE "c. " || Year 
             END AS [approx Year]
             FROM HistoricalItems
-            ORDER BY Year IS NULL, Year
+            ORDER BY {order_by} IS NULL, {order_by};
             """)
         return self.cursor.fetchall()
     
