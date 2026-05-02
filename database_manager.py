@@ -1,6 +1,6 @@
 import sqlite3
 
-# class that manages the database (2 tables)
+# class that manages the database (3 tables)
 class DatabaseManager():
     def __init__(self,database = "Priory.db",tables = ("tblHistoricalItem","tblItemImage","tblMatchingCategory")):
         # extracts names of tables for consistency
@@ -55,7 +55,7 @@ class DatabaseManager():
 
     # method to get image path/s from image id
     def get_image_path(self,id:int):
-        statement = f"SELECT ImagePath FROM {self.image_table} WHERE ImageId=? ;"
+        statement = f"SELECT ImagePath FROM {self.image_table} WHERE IDNumber=? ;"
         self.cursor.execute(statement,(id,)) # parameter must be passed in as tuple
         return self.cursor.fetchall()
     
@@ -113,4 +113,5 @@ if __name__ == "__main__":
     # print(d.get_category("Lecturns"))
     # print(d.get_subcategories("CS"))
     print(d.get_category_dict(("S", "L", "CS", "P", "W", "E", "LC", "M")))
+    # d.insert_into_image(ID_number=10,path="fake.png")
     # d.insert_into_image(ID_number=10,path="fake.png")
