@@ -2,10 +2,11 @@ import sqlite3
 
 # class that manages the database (2 tables)
 class DatabaseManager():
-    def __init__(self,database = "Priory.db",tables = ("tblHistoricalItem","tblItemImage")):
+    def __init__(self,database = "Priory.db",tables = ("tblHistoricalItem","tblItemImage","tblMatchingCategory")):
         # extracts names of tables for consistency
         self.item_table = tables[0]
         self.image_table = tables[1]
+        self.category_table = tables[2]
         #connects to database
         self.conn = sqlite3.connect(database)
         self.cursor = self.conn.cursor()
@@ -45,11 +46,26 @@ class DatabaseManager():
                             VALUES ({name},{category},{description},{year},{confidence});")
         self.conn.commit() # updates changes
 
+    # method to insert a new record into matching category table
+    def insert_into_category(self,subcategory="MISC",category="MISC"):
+        column_names = self.get_column_names(self.category_table)
+        self.cursor.execute(f"INSERT INTO {self.category_table} {column_names} \
+                            VALUES ('{subcategory}','{category}');")
+        self.conn.commit() # updates changes
+
     # method to get image path/s from image id
     def get_image_path(self,id:int):
         statement = f"SELECT ImagePath FROM {self.image_table} WHERE IDNumber=? ;"
         self.cursor.execute(statement,(id,)) # parameter must be passed in as tuple
         return self.cursor.fetchall()
+    
+    # method to get corresponding overarching category from the matching category table
+    def get_category(self,subcategory:str) -> str:
+        statement = f"SELECT Category FROM {self.category_table} WHERE Subcategory='{subcategory}' ;"
+        self.cursor.execute(statement)
+        temp = self.cursor.fetchall() # not yet in a usable format
+        category = temp[0][0]
+        return category
 
     # method to display list of all items - can be sorted differently
     def display_historic_items(self, order_by = "Year"):
@@ -69,8 +85,11 @@ class DatabaseManager():
         self.conn.commit()
         self.conn.close()
 
+
 if __name__ == "__main__":
     d = DatabaseManager()
-    d.insert_into_item(name="Cross",description="Very nice.",category="Cross",year=2020)
-    d.insert_into_image(ID_number=10,path="fake3.png")
-    print(d.get_image_path(10))
+    # testing
+    # d.insert_into_item(name="Cross",description="Very nice.",category="Crucifixes",year=2000)
+    # d.insert_into_category("Verges","CS")
+    # print(d.get_category("Lecturns"))
+    # d.insert_into_image(ID_number=10,path="fake.png")
