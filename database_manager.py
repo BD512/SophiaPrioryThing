@@ -109,9 +109,9 @@ if __name__ == "__main__":
     d = DatabaseManager()
     # testing
     # d.insert_into_item(name="Cross",description="Very nice.",category="Crucifixes",year=2000)
-    # d.insert_into_category("Verges","CS")
+    d.insert_into_category("MISC","M")
     # print(d.get_category("Lecturns"))
     # print(d.get_subcategories("CS"))
-    print(d.get_category_dict(("S", "L", "CS", "P", "W", "E", "LC", "M")))
+    # print(d.get_category_dict(("S", "L", "CS", "P", "W", "E", "LC", "M")))
     # d.insert_into_image(ID_number=10,path="fake.png")
     # d.insert_into_image(ID_number=10,path="fake.png")
