@@ -1,7 +1,7 @@
 import sqlite3
  
 # method that creates database and tables needed from scratch
-def create_database(database = "Priory.db",tables = ("tblHistoricalItem","tblItemImage")):
+def create_database(database = "Priory.db",tables = ("tblHistoricalItem","tblItemImage", "tblMatchingCategory")):
     # connect to the database (create if not exists)
     conn = sqlite3.connect(database)
     # create a cursor object
@@ -23,6 +23,14 @@ def create_database(database = "Priory.db",tables = ("tblHistoricalItem","tblIte
         ImagePath VARCHAR(100) NOT NULL,
         FOREIGN KEY (IDNumber) REFERENCES HistoricalItems(IDNumber),
         PRIMARY KEY (IDNumber, ImagePath)
+    );''')
+    # create linking table for the subcategories and associated overarching categories
+    cursor.execute(f'''
+    CREATE TABLE IF NOT EXISTS {tables[2]} (
+        Subcategory VARCHAR(20) NOT NULL DEFAULT('MISC'),
+        Category VARCHAR(20) NOT NULL DEFAULT('MISC'),
+        FOREIGN KEY (Subcategory) REFERENCES HistoricalItems(Category),
+        PRIMARY KEY (Subcategory, Category)             
     );''')
     # commit the changes
     conn.commit()
