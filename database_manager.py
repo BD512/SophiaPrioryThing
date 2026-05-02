@@ -47,7 +47,7 @@ class DatabaseManager():
 
     # method to get image path/s from image id
     def get_image_path(self,id:int):
-        statement = f"SELECT ImagePath FROM {self.image_table} WHERE ImageId=? ;"
+        statement = f"SELECT ImagePath FROM {self.image_table} WHERE IDNumber=? ;"
         self.cursor.execute(statement,(id,)) # parameter must be passed in as tuple
         return self.cursor.fetchall()
 
@@ -71,5 +71,6 @@ class DatabaseManager():
 
 if __name__ == "__main__":
     d = DatabaseManager()
-    d.insert_into_item(name="Cross",description="Very nice.",category="Cross",year=2000)
-    d.insert_into_image(ID_number=10,path="fake.png")
+    d.insert_into_item(name="Cross",description="Very nice.",category="Cross",year=2020)
+    d.insert_into_image(ID_number=10,path="fake3.png")
+    print(d.get_image_path(10))
