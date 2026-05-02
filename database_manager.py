@@ -34,16 +34,16 @@ class DatabaseManager():
         self.conn.commit() # updates changes
 
     # method to insert a new record into historic items table
-    def insert_into_item(self,name="NULL",category="MISC",description = "NULL",year=-1,confidence=0):
+    def insert_into_item(self,name="NULL",subcategory="MISC",description = "NULL",year=-1,confidence=0):
         if year < 0: year = "NULL" # years in AD must be positive
-        temp = [name,category,description]
+        temp = [name,subcategory,description]
         for i in range(len(temp)):
             if temp[i] != "NULL":
                 temp[i] = f"'{temp[i]}'" # adds extra speech marks around strings
-        name,category,description = temp # unpacks after updating
+        name,subcategory,description = temp # unpacks after updating
         column_names = self.get_column_names(self.item_table)[1:] # first column is autoincrement
         self.cursor.execute(f"INSERT INTO {self.item_table} {column_names} \
-                            VALUES ({name},{category},{description},{year},{confidence});")
+                            VALUES ({name},{subcategory},{description},{year},{confidence});")
         self.conn.commit() # updates changes
 
     # method to insert a new record into matching category table
@@ -66,6 +66,25 @@ class DatabaseManager():
         temp = self.cursor.fetchall() # not yet in a usable format
         category = temp[0][0]
         return category
+    
+    # method to return the list of subcategories for a given category
+    def get_subcategories(self, category:str) -> list[str]:
+        statement = f"SELECT Subcategory FROM {self.category_table} WHERE Category='{category}' ;"
+        self.cursor.execute(statement)
+        temp = self.cursor.fetchall() # not yet in a usable format
+        subcategory_list = list()
+        for subcategory in temp:
+            subcategory_list.append(subcategory[0])
+        return subcategory_list
+    
+    # method to return a dictionary of categories and their associated list of categories
+    def get_category_dict(self, categories:tuple[str]) -> dict:
+        #categories = self.get_column(f"{self.item_table}","Category")
+        dictionary = dict()
+        for category in categories:
+            subcategories = self.get_subcategories(category)
+            dictionary.update({category:subcategories})
+        return dictionary
 
     # method to display list of all items - can be sorted differently
     def display_historic_items(self, order_by = "Year"):
@@ -92,4 +111,6 @@ if __name__ == "__main__":
     # d.insert_into_item(name="Cross",description="Very nice.",category="Crucifixes",year=2000)
     # d.insert_into_category("Verges","CS")
     # print(d.get_category("Lecturns"))
+    # print(d.get_subcategories("CS"))
+    print(d.get_category_dict(("S", "L", "CS", "P", "W", "E", "LC", "M")))
     # d.insert_into_image(ID_number=10,path="fake.png")

@@ -11,7 +11,7 @@ def create_database(database = "Priory.db",tables = ("tblHistoricalItem","tblIte
     CREATE TABLE IF NOT EXISTS {tables[0]} (
         IDNumber INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
         Name VARCHAR(50) NOT NULL,
-        Category VARCHAR(20) NOT NULL DEFAULT('MISC'),
+        Subcategory VARCHAR(20) NOT NULL DEFAULT('MISC'),
         Description VARCHAR(1000),
         Year INTEGER,
         Confidence INTEGER DEFAULT(0)
@@ -29,7 +29,7 @@ def create_database(database = "Priory.db",tables = ("tblHistoricalItem","tblIte
     CREATE TABLE IF NOT EXISTS {tables[2]} (
         Subcategory VARCHAR(20) NOT NULL DEFAULT('MISC'),
         Category VARCHAR(20) NOT NULL DEFAULT('MISC'),
-        FOREIGN KEY (Subcategory) REFERENCES HistoricalItems(Category),
+        FOREIGN KEY (Subcategory) REFERENCES HistoricalItems(Subcategory),
         PRIMARY KEY (Subcategory, Category)             
     );''')
     # commit the changes
