@@ -1,8 +1,8 @@
 import sqlite3
 
 # class that manages the database (3 tables)
-class DatabaseManager():
-    def __init__(self,database = "Priory.db",tables = ("tblHistoricalItem","tblItemImage","tblMatchingCategory")):
+class DatabaseManager:
+    def __init__(self,database = "Priory.db", item_table="tblHistoricalItem",image_table="tblItemImage",category_table="tblMatchingCategory"):
         # extracts names of tables for consistency
         self.item_table = tables[0]
         self.image_table = tables[1]
