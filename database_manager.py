@@ -54,7 +54,7 @@ class DatabaseManager:
         self.conn.commit() # updates changes
 
     # method to get image path/s from image id
-    def get_image_path(self,id:int):
+    def get_image_path(self,identifier:int):
         statement = f"SELECT ImagePath FROM {self.image_table} WHERE IDNumber=? ;"
         self.cursor.execute(statement,(id,)) # parameter must be passed in as tuple
         return self.cursor.fetchall()
