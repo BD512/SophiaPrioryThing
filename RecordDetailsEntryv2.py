@@ -1,6 +1,7 @@
 
 # copied from Kaela's code but made a few changes
 # making independent of the database instance to make the code more versatile
+# if info needed from database to show options to add a record, this will be passed in as a parameter
 
 from tkinter import Tk, Label, Entry, ttk, Text, IntVar, Button
 
@@ -9,6 +10,7 @@ class RecordEntryGUI(Tk):
         super().__init__()
         self.confidence_level = IntVar()
         self.categories = ("S", "L", "CS", "P", "W", "E", "LC", "M")  # set categories
+        # to be moved to the main program to decide this
 
         Label(self, text="Item name:").grid(row=0, column=0, padx=10, pady=(5, 0))
         self.name_entry = Entry(self)
