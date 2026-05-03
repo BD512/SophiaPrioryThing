@@ -10,7 +10,7 @@ class DatabaseManager:
         #connects to database
         self.conn = sqlite3.connect(database)
         self.cursor = self.conn.cursor()
-        # self.create_database() # created the tables in the database if they don't exist
+        self.create_database() # created the tables in the database if they don't exist
 
     # method that creates database and tables needed from scratch
     def create_database(self):
@@ -37,6 +37,7 @@ class DatabaseManager:
         CREATE TABLE IF NOT EXISTS {self.category_table} (
             Subcategory VARCHAR(20) NOT NULL DEFAULT('MISC'),
             Category VARCHAR(20) NOT NULL DEFAULT('MISC'),
+            Description VARCHAR(500),
             FOREIGN KEY (Subcategory) REFERENCES HistoricalItems(Subcategory),
             PRIMARY KEY (Subcategory, Category)             
         );''')
@@ -81,10 +82,10 @@ class DatabaseManager:
         self.conn.commit() # updates changes
 
     # method to insert a new record into matching category table
-    def insert_into_category(self,subcategory="MISC",category="MISC"):
+    def insert_into_category(self,subcategory="MISC",category="MISC",description=""):
         column_names = self.get_column_names(self.category_table)
         self.cursor.execute(f"INSERT INTO {self.category_table} {column_names} \
-                            VALUES ('{subcategory}','{category}');")
+                            VALUES ('{subcategory}','{category}','{description}');")
         self.conn.commit() # updates changes
 
     # method to get image path/s from image id
@@ -143,7 +144,7 @@ if __name__ == "__main__":
     d = DatabaseManager()
     # testing
     # d.insert_into_item(name="Cross",description="Very nice.",category="Crucifixes",year=2000)
-    # d.insert_into_category("MISC","M")
+    d.insert_into_category("MISC","M")
     # print(d.get_category("Lecturns"))
     # print(d.get_subcategories("CS"))
     # print(d.get_category_dict(("S", "L", "CS", "P", "W", "E", "LC", "M")))
