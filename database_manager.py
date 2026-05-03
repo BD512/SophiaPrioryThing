@@ -4,9 +4,9 @@ import sqlite3
 class DatabaseManager:
     def __init__(self,database = "Priory.db", item_table="tblHistoricalItem",image_table="tblItemImage",category_table="tblMatchingCategory"):
         # extracts names of tables for consistency
-        self.item_table = tables[0]
-        self.image_table = tables[1]
-        self.category_table = tables[2]
+        self.item_table = item_table
+        self.image_table = image_table
+        self.category_table = category_table
         #connects to database
         self.conn = sqlite3.connect(database)
         self.cursor = self.conn.cursor()
