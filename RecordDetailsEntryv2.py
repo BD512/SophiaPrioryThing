@@ -10,6 +10,7 @@ class RecordEntryGUI(Tk):
         super().__init__()
         self.confidence_level = IntVar()
         self.categories = ("S", "L", "CS", "P", "W", "E", "LC", "M")  # set categories
+        # to be moved to the main program to decide this
 
         Label(self, text="Item name:").grid(row=0, column=0, padx=10, pady=(5, 0))
         self.name_entry = Entry(self)

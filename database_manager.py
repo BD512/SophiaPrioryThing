@@ -10,7 +10,7 @@ class DatabaseManager:
         #connects to database
         self.conn = sqlite3.connect(database)
         self.cursor = self.conn.cursor()
-        self.create_database() # created the tables in the database if they don't exist
+        # self.create_database() # created the tables in the database if they don't exist
 
     # method that creates database and tables needed from scratch
     def create_database(self):
