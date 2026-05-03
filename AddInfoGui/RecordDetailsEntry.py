@@ -23,7 +23,7 @@ class RecordDetailsEntry(Toplevel):
         self.description_entry = Text(self)
         self.description_entry.grid(row=2, column=1, padx=5, pady=5)
         Label(self, text="Image path:").grid(row=3, column=0, padx=5, pady=5)
-        # do a path entry thing here - find the one I did in 2024
+        # do a path entry thing here
 
         self.add_record_btn = Button(self, text="Add item", command=self.addRecord)
         self.add_record_btn.grid(row=4, column=0, padx=5, pady=5)

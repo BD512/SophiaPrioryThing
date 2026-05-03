@@ -3,13 +3,48 @@ import sqlite3
 # class that manages the database (3 tables)
 class DatabaseManager:
     def __init__(self,database = "Priory.db", item_table="tblHistoricalItem",image_table="tblItemImage",category_table="tblMatchingCategory"):
-        # extracts names of tables for consistency
+        self.database = database
         self.item_table = item_table
         self.image_table = image_table
         self.category_table = category_table
         #connects to database
         self.conn = sqlite3.connect(database)
         self.cursor = self.conn.cursor()
+        self.create_database()
+
+
+    # method that creates database and tables needed from scratch
+    def create_database(self):
+        # create a table containing data about historical items
+        self.cursor.execute(f'''
+        CREATE TABLE IF NOT EXISTS {self.item_table} (
+            IDNumber INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+            Name VARCHAR(50) NOT NULL,
+            Subcategory VARCHAR(20) NOT NULL DEFAULT('MISC'),
+            Description VARCHAR(1000),
+            Year INTEGER,
+            Confidence INTEGER DEFAULT(0)
+        );''')
+        # create a linking table containing images
+        self.cursor.execute(f'''
+        CREATE TABLE IF NOT EXISTS {self.image_table} (
+            IDNumber INTEGER NOT NULL,
+            ImagePath VARCHAR(100) NOT NULL,
+            FOREIGN KEY (IDNumber) REFERENCES HistoricalItems(IDNumber),
+            PRIMARY KEY (IDNumber, ImagePath)
+        );''')
+        # create linking table for the subcategories and associated overarching categories
+        self.cursor.execute(f'''
+        CREATE TABLE IF NOT EXISTS {self.category_table} (
+            Subcategory VARCHAR(20) NOT NULL DEFAULT('MISC'),
+            Category VARCHAR(20) NOT NULL DEFAULT('MISC'),
+            FOREIGN KEY (Subcategory) REFERENCES HistoricalItems(Subcategory),
+            PRIMARY KEY (Subcategory, Category)             
+        );''')
+        # commit the changes
+        self.conn.commit()
+        # close the connection
+        self.conn.close()
 
     # method to get list of column names in a certain table
     def get_column_names(self,table:str):
