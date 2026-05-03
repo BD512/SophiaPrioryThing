@@ -37,3 +37,5 @@ class FileUpload(Frame):
 
     def getPath(self) -> str:
         return self.path
+
+# todo - once the file paths have been selected, move to single folder
