@@ -52,6 +52,9 @@ class RecordEntryGUI(Tk):
         current_category = self.category_menu.get()
         self.subcategory_menu.config(values=self.category_dict[current_category])
 
+    def update_error_msg(self):
+        pass
+
     def get_name(self) -> str:
         return self.name_entry.get()
     
@@ -66,15 +69,28 @@ class RecordEntryGUI(Tk):
     
     def get_confidence(self) -> bool:
         return self.confidence_level.get()
+    
+    def get_item_details(self) -> list:
+        return self.get_name(),self.get_subcategory(),self.get_description(),self.get_year(),self.get_confidence()
 
-    def is_valid_record(self) ->bool:
+    def is_valid_record(self) -> bool:
+        pass
+
+    def is_new_category(self):
+        pass
+    
+    def is_new_subcategory(self):
         pass
 
     def test(self):
         print(self.get_name(), self.get_category(), self.get_description(), self.get_year(), self.get_confidence())
         #print(bool(self.get_name()))
 
-    def add_record(self):
+    def add_item_record(self):
+
+        current_item_details = self.get_item_details()
+        self.d.insert_into_item(current_item_details)
+        
         try:
             pass
 
