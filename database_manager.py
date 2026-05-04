@@ -111,7 +111,7 @@ class DatabaseManager:
         return subcategory_list
     
     # method to return a dictionary of categories and their associated list of categories
-    def get_category_dict(self, categories:tuple[str]) -> dict:
+    def get_category_dict(self, categories:tuple) -> dict:
         #categories = self.get_column(f"{self.item_table}","Category")
         dictionary = dict()
         for category in categories:
@@ -141,10 +141,10 @@ class DatabaseManager:
 if __name__ == "__main__":
     d = DatabaseManager()
     # testing
-    # d.insert_into_item(name="Cross",description="Very nice.",category="Crucifixes",year=2000)
+    # database.insert_into_item(name="Cross",description="Very nice.",category="Crucifixes",year=2000)
     d.insert_into_category("MISC","M")
-    # print(d.get_category("Lecturns"))
-    # print(d.get_subcategories("CS"))
-    # print(d.get_category_dict(("S", "L", "CS", "P", "W", "E", "LC", "M")))
-    # d.insert_into_image(ID_number=10,path="fake.png")
-    # d.insert_into_image(ID_number=10,path="fake.png")
+    # print(database.get_category("Lecturns"))
+    # print(database.get_subcategories("CS"))
+    # print(database.get_category_dict(("S", "L", "CS", "P", "W", "E", "LC", "M")))
+    # database.insert_into_image(ID_number=10,path="fake.png")
+    # database.insert_into_image(ID_number=10,path="fake.png")
