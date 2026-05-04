@@ -43,8 +43,6 @@ class DatabaseManager:
         );''')
         # commit the changes
         self.conn.commit()
-        # close the connection
-        self.conn.close()
 
     # method to get list of column names in a certain table
     def get_column_names(self,table:str):
