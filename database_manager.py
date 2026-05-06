@@ -132,6 +132,10 @@ class DatabaseManager:
             """)
         return self.cursor.fetchall()
     
+    def drop_database(self):
+        self.cursor.execute(f"DROP DATABASE {self.database};")
+        self.conn.commit()
+    
     # method that commits changes and closes connection before a table object is garbage-collected
     def __del__(self):
         self.conn.commit()
