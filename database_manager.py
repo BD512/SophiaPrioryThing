@@ -136,6 +136,9 @@ class DatabaseManager:
         self.cursor.execute(f"DROP TABLE {self.item_table};")
         self.cursor.execute(f"DROP TABLE {self.image_table};")
         self.conn.commit()
+
+    def create_subcategories(self):
+        pass
     
     # method that commits changes and closes connection before a table object is garbage-collected
     def __del__(self):
