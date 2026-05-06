@@ -10,7 +10,7 @@ class RecordEntryWindow(Toplevel):
         self.database = DatabaseManager()
 
         self.confidence_level = IntVar()
-        self.categories = ("S", "L", "CS", "P", "W", "E", "LC", "M")  # set categories
+        self.categories = ("S", "L", "CS", "P", "W", "E", "LC", "M")  # set categories, should be gotten from the database - fix this
 
         Label(self, text="Item name:").grid(row=0, column=0, padx=10, pady=(5, 0), sticky="nsew")
         self.name_entry = Entry(self)
@@ -48,18 +48,24 @@ class RecordEntryWindow(Toplevel):
         addBtn = Button(self, text="Add item") # the final submit button
         addBtn.grid(row=6, column=1, padx=10, pady=10, sticky="nsew")
 
+        self.errorMsg = Label(self, text="") # the error message to update depending on the input of 
+        self.errorMsg.grid(row=7, column=0)
+
         # testBtn = Button(self, text="test", command=self.test)
         # testBtn.grid(row=6, column=1)
 
-    def update_subcategory_menu(self, event):
+    def update_subcategory_menu(self, event): 
         current_category = self.category_menu.get()
         self.subcategory_menu.config(values=self.category_dict[current_category])
 
-    def update_error_msg(self):
-        pass
+    def update_error_msg(self, text):
+        self.errorMsg.config(text=text)
 
     def get_name(self) -> str:
         return self.name_entry.get()
+    
+    def get_category(self) -> str:
+        return self.category_menu.get()
 
     def get_subcategory(self) -> str:
         return self.subcategory_menu.get()
@@ -77,12 +83,16 @@ class RecordEntryWindow(Toplevel):
         return self.get_name(), self.get_subcategory(), self.get_description(), self.get_year(), self.get_confidence()
 
     def is_valid_record(self) -> bool:
-        pass
+        if not self.get_name():
+            self.update_error_msg("Make sure to enter the name of the item")
 
-    def is_new_category(self):
-        pass
+        # add more validation obv
 
-    def is_new_subcategory(self):
+    def new_category(self):
+        if self.get_category not in self.categories: # 
+            pass
+
+    def new_subcategory(self):
         pass
 
     def test(self):
@@ -90,6 +100,9 @@ class RecordEntryWindow(Toplevel):
         # print(bool(self.get_name()))
 
     def add_item_record(self):
+
+        self.new_category()
+        self.new_subcategory()
 
         current_item_details = self.get_item_details()
         self.database.insert_into_item(current_item_details)
