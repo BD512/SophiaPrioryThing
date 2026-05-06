@@ -6,7 +6,7 @@
 from tkinter import Tk, Label, Entry, ttk, Text, IntVar, Button, Toplevel
 from database_manager import DatabaseManager
 
-class RecordEntryGUI(Toplevel):
+class RecordEntryWindow(Toplevel):
     def __init__(self, master):
         super().__init__(master)
         self.grid_rowconfigure((0, 1, 2, 3, 4, 5, 6), weight=1)
@@ -109,5 +109,5 @@ class RecordEntryGUI(Toplevel):
         pass
 
 a = Tk()
-entry = RecordEntryGUI(a)
+entry = RecordEntryWindow(a)
 a.mainloop()
