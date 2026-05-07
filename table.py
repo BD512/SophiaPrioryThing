@@ -2,21 +2,16 @@ from tkinter import Label, Frame
 
 # a class that manages the table of data
 class Table(Frame): # this is an example of inheritance
-    def __init__(self,master,db_manager,bg_colour="white",font=("Arial",12),singleplayer=True):
+    def __init__(self,master,db_manager,bg_colour="white",font=("Arial",12)):
         super().__init__(master)
         self.master = master # window
         self.db_manager = db_manager
         self.font = font
         self.bg_colour = bg_colour
-        self.singleplayer = singleplayer
         self.order_by = ""
         self.order = ""
-        self.table1_difficulty = ""
         self.headings, self.data = self.get_data()
-        if self.singleplayer:
-            self.title_text="Single-player Leaderboard"
-        else:
-            self.title_text="Two-player Leaderboard"
+        self.title_text="Data currently held in tblHistoricItems"
 
     # method that binds the change_sort method to certain headers and updates the text colours
     def bind_headers(self):
