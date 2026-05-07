@@ -122,12 +122,13 @@ class DatabaseManager:
     # method to display list of all items - can be sorted differently
     def display_historic_items(self, order_by = "Year"):
         self.cursor.execute(f"""
-            SELECT Name, Category, Description,
+            SELECT Name, Subcategory,
             CASE 
                 WHEN Confidence = 1 THEN Year 
                 ELSE "c. " || Year 
-            END AS [approx Year]
-            FROM HistoricalItems
+            END AS [approx Year],
+            Description
+            FROM {self.item_table}
             ORDER BY {order_by} IS NULL, {order_by};
             """)
         return self.cursor.fetchall()
