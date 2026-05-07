@@ -138,8 +138,46 @@ class DatabaseManager:
         self.conn.commit()
 
     def create_subcategories(self):
-        pass
-    
+        # category S
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Ancient Stalls","Stalls"))
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Bishop Stalls","Stalls"))
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Sedilia","Stalls"))
+        # category L
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Chalice","Liturgical Items"))
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Ciborium","Liturgical Items"))
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Collection Plate","Liturgical Items"))
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Flagon","Liturgical Items"))
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Paten","Liturgical Items"))
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Thurible","Liturgical Items"))
+        # category CS
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Coptic Crosses","Crosses and Staves"))
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Processional Crosses","Crosses and Staves"))
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Crucifixes","Crosses and Staves"))
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Churchwarden Staves","Crosses and Staves"))
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Verges","Crosses and Staves"))
+        # category P
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Pulpit","Pulpit and Lecturn"))
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Lecturn","Pulpit and Lecturn"))
+        # category W
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Regimental Chapel","Stained Glass Windows"))
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Main Church","Stained Glass Windows"))
+        # category E
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Altar Frontals - High Altar","Embroidery"))
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Altar Frontals - Other","Embroidery"))
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Hassocks","Embroidery"))
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Copes","Embroidery"))
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Chasubles","Embroidery"))
+        # category LC
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Chandeliers","Lighting and Candles"))
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Altar Candles","Lighting and Candles"))
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Altar Candles","Lighting and Candles"))
+        # category M
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Baptismal Fonts","Miscellaneous"))
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Icons","Miscellaneous"))
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Statues","Miscellaneous"))
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Wooden Chests","Miscellaneous"))
+        self.cursor.execute(f"INSERT INTO TABLE {self.category_table} (Subcategory,Category) VALUES (?,?);",("Aumbry","Miscellaneous"))
+
     # method that commits changes and closes connection before a table object is garbage-collected
     def __del__(self):
         self.conn.commit()
