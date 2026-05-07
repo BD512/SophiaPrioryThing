@@ -1,5 +1,6 @@
 from tkinter import Tk, Label, Entry, ttk, Text, IntVar, Button, Toplevel
 from database_manager import DatabaseManager
+from datetime import date
 
 class RecordEntryWindow(Toplevel):
     def __init__(self, master):
@@ -45,11 +46,11 @@ class RecordEntryWindow(Toplevel):
                                                offvalue=0)
         self.confident_check.grid(row=5, column=1, padx=10, pady=10, sticky="nsew")
 
-        addBtn = Button(self, text="Add item") # the final submit button
+        addBtn = Button(self, text="Add item", command=self.test) # the final submit button
         addBtn.grid(row=6, column=1, padx=10, pady=10, sticky="nsew")
 
-        self.errorMsg = Label(self, text="") # the error message to update depending on the input of 
-        self.errorMsg.grid(row=7, column=0)
+        self.errorMsg = Label(self, text="", width=25, wraplength=120, fg="#da4646") # the error message to update depending on the input of 
+        self.errorMsg.grid(row=6, column=0)
 
         # testBtn = Button(self, text="test", command=self.test)
         # testBtn.grid(row=6, column=1)
@@ -73,48 +74,95 @@ class RecordEntryWindow(Toplevel):
     def get_description(self) -> str:
         return self.description_entry.get("1.0", "end-1c")
 
-    def get_year(self) -> int:
-        return int(self.year_entry.get())
+    def get_year(self) -> str:
+        return self.year_entry.get()
 
     def get_confidence(self) -> bool:
-        return bool(self.confidence_level.get())
+        return bool(self.confidence_level.get()) # doesn't need to be validated so can be cast in the getter, unlike year
 
-    def get_item_details(self) -> tuple[str, str, str, int, bool]:
-        return self.get_name(), self.get_subcategory(), self.get_description(), self.get_year(), self.get_confidence()
+    def get_item_details_for_record(self) -> tuple[str, str, str, int, bool]: # returns all current item info but not the overall category, also, casts the year to be an integer as it's already been validated before now so won't cause a ValueError
+        return self.get_name(), self.get_subcategory(), self.get_description(), int(self.get_year()), self.get_confidence()
+    
+    def get_all_item_details_for_validation(self) -> list[str, str, str, str, str, bool]: # returns all item details, including the larger category
+        return [self.get_name(), self.get_subcategory(), self.get_category(), self.get_description(), self.get_year(), self.get_confidence()]
 
-    def is_valid_record(self) -> bool:
-        if not self.get_name():
-            self.update_error_msg("Make sure to enter the name of the item")
+    def is_valid_record(self) -> bool: # returns if the current item's inputted data is valid, and updates the error message for whenever it isn't
+        details = self.get_all_item_details_for_validation()
+        not_null_details = self.get_all_item_details_for_validation()
+        # print(f"b4 popping\nnot null details: {not_null_details}\ndetails: {details}")
+        not_null_details.pop(3) # has the list of all items details without the descriotion for comparison:
+        not_null_details.pop(3) # now removes the year based off of new index
+        # print(f"after popping\nnot null details: {not_null_details}\ndetails: {details}")
 
-        # add more validation obv
+        if "" in not_null_details: # because details[3] is the description, which is allowed to be an empty string
+            self.update_error_msg("Make sure to enter all necesary item details (name and categories)")
+            return False
 
-    def new_category(self):
-        if self.get_category not in self.categories: # 
-            pass
+        else:
+            if details[4]: # if there is a year entered, check that it is valid
+                try:
+                    item_year = int(details[4])
 
-    def new_subcategory(self):
-        pass
+                    if item_year > date.today().year:
+                        self.update_error_msg("This year hasn't happened yet")
+                        return False
+                    
+                    elif item_year < 0:
+                        self.update_error_msg("Year must be positive AD")
+                        return False
+                    
+                except ValueError:
+                    self.update_error_msg("Make sure the year is an integer number")
+                    return False
+            
+            self.update_error_msg("")
+            return True
 
-    def test(self):
+        # TODO:
+        # add more validation? did i miss anything? it's 1:30am so i probably did
+        # check what's happening with year validation - is this right?
+        # is anything else allowed to be "", is anything ive allowed to be "" not actually allowed to be ""
+        # AM i correct that all subcategories must be unique regardless of category?
+        # is me casting confidence from an int to a bool unnecessary? just bc i noticed in database manager it's default value is an int
+        # what's happening with images?
+
+        # need option of adding a subcategory's description somewhere at some point yes yes
+        # lol i haven't tested this at allllllllllllllllll
+        # need to add method to database manager to get categories instead of having that hard-coded tuple in the initialisation of this toplevel
+
+    def update_category(self): # if there is a new category or subcategory, it is added to the database's matching category table accordingly
+
+        if self.is_new_category():
+            if self.is_new_subcategory():
+                self.database.insert_into_category(self.get_subcategory(),self.get_category(),"")
+
+            else: # cannot have duplicate subcategories even with different categories - subcategories must be unique
+                self.update_error_msg("If you are adding a new category, the subcategory must also be new")
+
+        elif self.is_new_subcategory():
+            self.database.insert_into_category(self.get_subcategory(),self.get_category(),"") # subcategory description is currently blank - maybe instead could have something appear for sophia to add description
+
+    def is_new_category(self) -> bool: # method to return whether or not the current category is new
+        if self.get_category() not in self.categories:
+            return True
+        return False
+
+    def is_new_subcategory(self) -> bool: # method to check if the current subcategory already exists
+        if self.get_subcategory() not in self.database.get_subcategories():
+            return True
+        return False
+
+    def add_item_record(self): # inserts item record into the historical item table after updating the category table where necessary
+
+        self.update_category()
+        if self.is_valid_record():
+            self.database.insert_into_item(self.get_item_details_for_record())
+
+    def test(self): # testinggg!
+        self.is_valid_record()
         print(self.get_name(), self.get_subcategory(), self.get_description(), self.get_year(), self.get_confidence())
         # print(bool(self.get_name()))
 
-    def add_item_record(self):
-
-        self.new_category()
-        self.new_subcategory()
-
-        current_item_details = self.get_item_details()
-        self.database.insert_into_item(current_item_details)
-
-        try:
-            pass
-
-        except ValueError:
-            pass
-
-    def addCategory(self):
-        pass
 
 a = Tk()
 entry = RecordEntryWindow(a)
