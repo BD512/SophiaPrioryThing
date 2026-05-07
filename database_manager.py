@@ -98,7 +98,7 @@ class DatabaseManager:
     def get_image_path(self,identifier:int):
         statement = f"SELECT ImagePath FROM {self.image_table} WHERE IDNumber=? ;"
         self.cursor.execute(statement,(identifier,)) # parameter must be passed in as tuple
-        return self.cursor.fetchall()
+        return self.cursor.fetchall()[0]
     
     # method to get corresponding overarching category from the matching category table
     def get_category(self,subcategory:str) -> str:
