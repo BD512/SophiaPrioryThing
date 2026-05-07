@@ -118,6 +118,15 @@ class DatabaseManager:
             subcategory_list.append(subcategory[0])
         return subcategory_list
     
+    def get_categories(self) -> list[str]:
+        statement = f"SELECT Category FROM {self.category_table} ;"
+        self.cursor.execute(statement)
+        temp = self.cursor.fetchall() # not yet in a usable format
+        category_list = list()
+        for category in temp:
+            category_list.append(category[0])
+        return category_list
+    
     # method to return a dictionary of categories and their associated list of categories
     def get_category_dict(self, categories=None) -> dict:
         if not categories:
@@ -205,7 +214,8 @@ if __name__ == "__main__":
     d = DatabaseManager()
     # testing
     # database.insert_into_item(name="Cross",description="Very nice.",category="Crucifixes",year=2000)
-    d.insert_into_category("MISC","M")
+    # d.insert_into_category("MISC","M")
+    print(d.get_category_dict(d.get_categories()))
     # print(database.get_category("Lecturns"))
     # print(database.get_subcategories("CS"))
     # print(database.get_category_dict(("S", "L", "CS", "P", "W", "E", "LC", "M")))
