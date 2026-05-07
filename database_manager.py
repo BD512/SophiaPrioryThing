@@ -11,6 +11,14 @@ class DatabaseManager:
         self.conn = sqlite3.connect(database)
         self.cursor = self.conn.cursor()
         self.create_database() # created the tables in the database if they don't exist
+        # it would be better programming if we got the below attributes from get_categories_dict
+        self.categories = ("Stalls","Liturgical Items","Crosses and Staves","Pulpit and Lecturn","Stained Glass Windows",\
+                           "Embroidery","Lighting and Candles","Miscellaneous")
+        self.subcategories = ("Ancient Stalls","Bishop Stalls","Sedilia","Chalice","Ciborium","Collection Plate","Flagon",\
+                              "Paten","Thurible","Coptic Crosses","Processional Crosses","Crucifixes","Churchwarden Staves",\
+                              "Verges","Pulpit","Lecturn","Regimental Chapel","Main Church","Altar Frontals - High Altar",\
+                              "Altar Frontals - Other","Hassocks","Copes","Chasubles","Chandeliers","Altar Candles",\
+                              "Baptismal Fonts","Icons","Statues","Wooden Chests","Aumbry")
 
     # method that creates database and tables needed from scratch
     def create_database(self):
@@ -120,16 +128,22 @@ class DatabaseManager:
         return dictionary
 
     # method to display list of all items - can be sorted differently
-    def display_historic_items(self, order_by = "Year"):
+    def display_historic_items(self, order_by = "Year", order = "ASC", subcategory=None, category=None):
+        if subcategory in self.subcategories:
+            where_statement = f"WHERE Subcategory = '{subcategory}'"
+        else:
+            where_statement = ""
         self.cursor.execute(f"""
             SELECT Name, Subcategory,
             CASE 
                 WHEN Confidence = 1 THEN Year 
                 ELSE "c. " || Year 
             END AS [approx Year],
-            Description
-            FROM {self.item_table}
-            ORDER BY {order_by} IS NULL, {order_by};
+            Description,
+            COUNT (ImagePath) OVER (PARTITION BY {self.item_table}.IDNumber) AS [Number of Images]
+            FROM {self.item_table} LEFT JOIN {self.image_table} ON {self.item_table}.IDNumber = {self.image_table}.IDNumber
+            {where_statement}
+            ORDER BY {order_by} IS NULL, {order_by} {order}
             """)
         return self.cursor.fetchall()
     
