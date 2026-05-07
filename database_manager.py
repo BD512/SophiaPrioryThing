@@ -135,6 +135,7 @@ class DatabaseManager:
     def drop_tables(self):
         self.cursor.execute(f"DROP TABLE {self.item_table};")
         self.cursor.execute(f"DROP TABLE {self.image_table};")
+        self.cursor.execute(f"DROP TABLE {self.category_table};")
         self.conn.commit()
 
     def create_subcategories(self):
