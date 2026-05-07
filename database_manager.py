@@ -119,8 +119,11 @@ class DatabaseManager:
         return subcategory_list
     
     # method to return a dictionary of categories and their associated list of categories
-    def get_category_dict(self, categories:tuple) -> dict:
-        #categories = self.get_column(f"{self.item_table}","Category")
+    def get_category_dict(self, categories=None) -> dict:
+        if not categories:
+            categories = self.get_column(f"{self.item_table}","Category")
+            for i in range(len(categories)):
+                categories[i] = categories[i][0]
         dictionary = dict()
         for category in categories:
             subcategories = self.get_subcategories(category)
