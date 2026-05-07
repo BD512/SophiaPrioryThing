@@ -118,8 +118,17 @@ class DatabaseManager:
             subcategory_list.append(subcategory[0])
         return subcategory_list
     
+    def get_categories(self) -> list[str]:
+        statement = f"SELECT Category FROM {self.category_table} ;"
+        self.cursor.execute(statement)
+        temp = self.cursor.fetchall() # not yet in a usable format
+        category_list = list()
+        for category in temp:
+            category_list.append(category[0])
+        return category_list
+    
     # method to return a dictionary of categories and their associated list of categories
-    def get_category_dict(self, categories:tuple) -> dict:
+    def get_category_dict(self, categories:tuple) -> dict[str:list[str]]: # returns a dictionary where the keys are the category and the values are lists of associated subcategories
         #categories = self.get_column(f"{self.item_table}","Category")
         dictionary = dict()
         for category in categories:
