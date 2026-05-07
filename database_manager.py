@@ -11,6 +11,14 @@ class DatabaseManager:
         self.conn = sqlite3.connect(database)
         self.cursor = self.conn.cursor()
         self.create_database() # created the tables in the database if they don't exist
+        # it would be better programming if we got the below attributes from get_categories_dict
+        self.categories = ("Stalls","Liturgical Items","Crosses and Staves","Pulpit and Lecturn","Stained Glass Windows",\
+                           "Embroidery","Lighting and Candles","Miscellaneous")
+        self.subcategories = ("Ancient Stalls","Bishop Stalls","Sedilia","Chalice","Ciborium","Collection Plate","Flagon",\
+                              "Paten","Thurible","Coptic Crosses","Processional Crosses","Crucifixes","Churchwarden Staves",\
+                              "Verges","Pulpit","Lecturn","Regimental Chapel","Main Church","Altar Frontals - High Altar",\
+                              "Altar Frontals - Other","Hassocks","Copes","Chasubles","Chandeliers","Altar Candles",\
+                              "Baptismal Fonts","Icons","Statues","Wooden Chests","Aumbry")
 
     # method that creates database and tables needed from scratch
     def create_database(self):
@@ -120,31 +128,75 @@ class DatabaseManager:
         return dictionary
 
     # method to display list of all items - can be sorted differently
-    def display_historic_items(self, order_by = "Year"):
+    def display_historic_items(self, order_by = "Year", order = "ASC", subcategory=None, category=None):
+        if subcategory in self.subcategories:
+            where_statement = f"WHERE Subcategory = '{subcategory}'"
+        else:
+            where_statement = ""
         self.cursor.execute(f"""
-            SELECT Name, Category, Description,
+            SELECT Name, Subcategory,
             CASE 
                 WHEN Confidence = 1 THEN Year 
                 ELSE "c. " || Year 
-            END AS [approx Year]
-            FROM HistoricalItems
-            ORDER BY {order_by} IS NULL, {order_by};
+            END AS [approx Year],
+            Description,
+            COUNT (ImagePath) OVER (PARTITION BY {self.item_table}.IDNumber) AS [Number of Images]
+            FROM {self.item_table} LEFT JOIN {self.image_table} ON {self.item_table}.IDNumber = {self.image_table}.IDNumber
+            {where_statement}
+            ORDER BY {order_by} IS NULL, {order_by} {order}
             """)
         return self.cursor.fetchall()
     
     def drop_tables(self):
         self.cursor.execute(f"DROP TABLE {self.item_table};")
         self.cursor.execute(f"DROP TABLE {self.image_table};")
+        self.cursor.execute(f"DROP TABLE {self.category_table};")
         self.conn.commit()
 
     def create_subcategories(self):
-        pass
-    
+        # category S
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Ancient Stalls","Stalls"))
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Bishop Stalls","Stalls"))
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Sedilia","Stalls"))
+        # category L
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Chalice","Liturgical Items"))
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Ciborium","Liturgical Items"))
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Collection Plate","Liturgical Items"))
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Flagon","Liturgical Items"))
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Paten","Liturgical Items"))
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Thurible","Liturgical Items"))
+        # category CS
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Coptic Crosses","Crosses and Staves"))
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Processional Crosses","Crosses and Staves"))
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Crucifixes","Crosses and Staves"))
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Churchwarden Staves","Crosses and Staves"))
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Verges","Crosses and Staves"))
+        # category P
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Pulpit","Pulpit and Lecturn"))
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Lecturn","Pulpit and Lecturn"))
+        # category W
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Regimental Chapel","Stained Glass Windows"))
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Main Church","Stained Glass Windows"))
+        # category E
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Altar Frontals - High Altar","Embroidery"))
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Altar Frontals - Other","Embroidery"))
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Hassocks","Embroidery"))
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Copes","Embroidery"))
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Chasubles","Embroidery"))
+        # category LC
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Chandeliers","Lighting and Candles"))
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Altar Candles","Lighting and Candles"))
+        # category M
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Baptismal Fonts","Miscellaneous"))
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Icons","Miscellaneous"))
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Statues","Miscellaneous"))
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Wooden Chests","Miscellaneous"))
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Aumbry","Miscellaneous"))
+
     # method that commits changes and closes connection before a table object is garbage-collected
     def __del__(self):
         self.conn.commit()
         self.conn.close()
-
 
 if __name__ == "__main__":
     d = DatabaseManager()
