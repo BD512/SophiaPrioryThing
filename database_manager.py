@@ -128,7 +128,8 @@ class DatabaseManager:
         return category_list
     
     # method to return a dictionary of categories and their associated list of categories
-    def get_category_dict(self, categories=None) -> dict:
+    def get_category_dict(self, categories=None) -> dict: 
+        # returns a dictionary where the keys are the category and the values are lists of associated subcategories
         if not categories:
             categories = self.get_column(f"{self.item_table}","Category")
             for i in range(len(categories)):
