@@ -11,10 +11,6 @@ class DatabaseManager:
         self.conn = sqlite3.connect(database)
         self.cursor = self.conn.cursor()
         self.create_database() # created the tables in the database if they don't exist
-        self.category_dict = self.get_category_dict()
-        print(self.category_dict)
-        self.categories = ("Stalls","Liturgical Items","Crosses and Staves","Pulpit and Lecturn","Stained Glass Windows","Embroidery","Lighting and Candles","Miscellaneous")
-        self.subcategories = ("Ancient Stalls","Bishop Stalls","Sedilia","Chalice","Ciborium","Collection Plate","Flagon","Paten","Thurible","Lighting and Candles","Miscellaneous")
 
     # method that creates database and tables needed from scratch
     def create_database(self):
@@ -47,25 +43,6 @@ class DatabaseManager:
         );''')
         # commit the changes
         self.conn.commit()
-
-    # method to return the list of subcategories for a given category
-    def get_subcategories(self, category:str) -> list[str]:
-        self.cursor.execute(f"SELECT Subcategory FROM {self.category_table} WHERE Category=? ;",(category))
-        temp = self.cursor.fetchall() # not yet in a usable format
-        subcategory_list = list()
-        for subcategory in temp:
-            subcategory_list.append(subcategory[0])
-        return subcategory_list
-    
-    # method to return a dictionary of categories and their associated list of subcategories
-    def get_category_dict(self, categories=None) -> dict:
-        if not categories: # if not passed in
-            categories = self.get_column(f"{self.category_table}","Category")
-        dictionary = dict()
-        for category in categories:
-            subcategories = self.get_subcategories(category)
-            dictionary.update({category:subcategories})
-        return dictionary
 
     # method to get list of column names in a certain table
     def get_column_names(self,table:str):
@@ -122,23 +99,37 @@ class DatabaseManager:
         temp = self.cursor.fetchall() # not yet in a usable format
         category = temp[0][0]
         return category
+    
+    # method to return the list of subcategories for a given category
+    def get_subcategories(self, category:str) -> list[str]:
+        statement = f"SELECT Subcategory FROM {self.category_table} WHERE Category='{category}' ;"
+        self.cursor.execute(statement)
+        temp = self.cursor.fetchall() # not yet in a usable format
+        subcategory_list = list()
+        for subcategory in temp:
+            subcategory_list.append(subcategory[0])
+        return subcategory_list
+    
+    # method to return a dictionary of categories and their associated list of categories
+    def get_category_dict(self, categories:tuple) -> dict:
+        #categories = self.get_column(f"{self.item_table}","Category")
+        dictionary = dict()
+        for category in categories:
+            subcategories = self.get_subcategories(category)
+            dictionary.update({category:subcategories})
+        return dictionary
 
     # method to display list of all items - can be sorted differently
-    def display_historic_items(self, order_by = "Year", category=None, subcategory=None):
-        if subcategory:
-            if subcategory in self.subcategories:
-                pass
+    def display_historic_items(self, order_by = "Year"):
         self.cursor.execute(f"""
-        SELECT Name, Subcategory,
-        CASE 
-            WHEN Confidence = 1 THEN Year 
-            ELSE "c. " || Year 
-        END AS [approx Year],
-        Description,
-        COUNT (ImagePath) OVER (PARTITION BY tblHistoricalItem.IDNumber) AS [Number of Images]
-        FROM tblHistoricalItem LEFT JOIN tblItemImage ON tblHistoricalItem.IDNumber = tblItemImage.IDNumber
-        WHERE Subcategory = "Coptic Crosses"
-        ORDER BY [Number of Images] IS NULL, [Number of Images]
+            SELECT Name, Subcategory,
+            CASE 
+                WHEN Confidence = 1 THEN Year 
+                ELSE "c. " || Year 
+            END AS [approx Year],
+            Description
+            FROM {self.item_table}
+            ORDER BY {order_by} IS NULL, {order_by};
             """)
         return self.cursor.fetchall()
     
@@ -192,7 +183,6 @@ class DatabaseManager:
     def __del__(self):
         self.conn.commit()
         self.conn.close()
-
 
 if __name__ == "__main__":
     d = DatabaseManager()
