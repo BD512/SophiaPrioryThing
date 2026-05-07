@@ -29,7 +29,7 @@ class DatabaseManager:
         CREATE TABLE IF NOT EXISTS {self.image_table} (
             IDNumber INTEGER NOT NULL,
             ImagePath VARCHAR(100) NOT NULL,
-            FOREIGN KEY (IDNumber) REFERENCES HistoricalItems(IDNumber),
+            FOREIGN KEY (IDNumber) REFERENCES HistoricalItem (IDNumber),
             PRIMARY KEY (IDNumber, ImagePath)
         );''')
         # create linking table for the subcategories and associated overarching categories
@@ -38,7 +38,7 @@ class DatabaseManager:
             Subcategory VARCHAR(20) NOT NULL DEFAULT('MISC'),
             Category VARCHAR(20) NOT NULL DEFAULT('MISC'),
             Description VARCHAR(500),
-            FOREIGN KEY (Subcategory) REFERENCES HistoricalItems(Subcategory),
+            FOREIGN KEY (Subcategory) REFERENCES HistoricalItem (Subcategory),
             PRIMARY KEY (Subcategory, Category)             
         );''')
         # commit the changes
@@ -132,9 +132,13 @@ class DatabaseManager:
             """)
         return self.cursor.fetchall()
     
-    def drop_database(self):
-        self.cursor.execute(f"DROP DATABASE {self.database};")
+    def drop_tables(self):
+        self.cursor.execute(f"DROP TABLE {self.item_table};")
+        self.cursor.execute(f"DROP TABLE {self.image_table};")
         self.conn.commit()
+
+    def create_subcategories(self):
+        pass
     
     # method that commits changes and closes connection before a table object is garbage-collected
     def __del__(self):
