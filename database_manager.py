@@ -141,11 +141,20 @@ class DatabaseManager:
         return dictionary
 
     # method to display list of all items - can be sorted differently
-    def display_historic_items(self, order_by = "Year", order = "ASC", subcategory=None, category=None):
+    def display_historic_items(self, order_by = "Name", order = "ASC", subcategory=None, category=None):
+        # validation
         if subcategory in self.subcategories:
             where_statement = f"WHERE Subcategory = '{subcategory}'"
         else:
             where_statement = ""
+        if category in self.categories:
+            where_statement = f"WHERE Subcategory = '{category}'"
+        else:
+            where_statement = ""
+        if order not in ("ASC","DESC"):
+            order="ASC" # reverts to default
+        if order_by not in ("Name","Subcategory","approx Year","Description","Number of Images"):
+            order_by = "Name"
         self.cursor.execute(f"""
             SELECT Name, Subcategory,
             CASE 
