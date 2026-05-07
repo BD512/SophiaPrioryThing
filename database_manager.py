@@ -171,7 +171,6 @@ class DatabaseManager:
         # category LC
         self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Chandeliers","Lighting and Candles"))
         self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Altar Candles","Lighting and Candles"))
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Altar Candles","Lighting and Candles"))
         # category M
         self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Baptismal Fonts","Miscellaneous"))
         self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Icons","Miscellaneous"))
