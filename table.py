@@ -12,8 +12,10 @@ class HistoricItems(list):
         self.extend([(record[0], record[1], record[2], record[3], record[4]) for record in data])
 
     def delete_historic_item(self, record):
-        self.remove(record)
-        #self.db.drop_record()
+        id = self.db.get_id_number(record[0])
+        if id:
+            self.db.delete_record(id)
+        self.read_from_db() # update list view 
 
 class Table(ttk.Treeview):
     def __init__(self, master, items:HistoricItems):
@@ -46,12 +48,11 @@ class Table(ttk.Treeview):
 
         # print(self.getSelection()[0][1])
     def deleteSelection(self):
-        pass
-        # record = self.items.findrecordFromname(self.getSelection()[0])
-        # self.items.delete_historic_item(record)
-        # if record in self.items_shown:
-        #     self.items_shown.remove(record)
-        # self.update_items()
+        record = self.getSelection()
+        self.items.delete_historic_item(record)
+        if record in self.items_shown:
+            self.items_shown.remove(record)
+        self.update_items()
 
     def showRightClickOptions(self, event):
         row_id = self.identify_row(event.y)
