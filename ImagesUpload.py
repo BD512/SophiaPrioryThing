@@ -115,10 +115,10 @@ class FilesUpload(Frame):
 
 
 
-
-# todo - once the file paths have been selected, move to single folder
-a = Tk()
-a.rowconfigure(0, weight=1)
-a.columnconfigure(0, weight=1)
-FilesUpload(a).grid(row=0, column=0, sticky="nsew")
-a.mainloop()
+if __name__ == "__main__":
+    # todo - once the file paths have been selected, move to single folder
+    a = Tk()
+    a.rowconfigure(0, weight=1)
+    a.columnconfigure(0, weight=1)
+    FilesUpload(a).grid(row=0, column=0, sticky="nsew")
+    a.mainloop()
