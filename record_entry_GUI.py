@@ -80,11 +80,11 @@ class RecordEntryWindow(Toplevel):
     def get_confidence(self) -> bool:
         return bool(self.confidence_level.get()) # doesn't need to be validated so can be cast in the getter, unlike year
 
-    def get_item_details_for_record(self) -> str, str, str, int, bool: # returns all current item info but not the overall category, also, casts the year to be an integer as it's already been validated before now so won't cause a ValueError
+    def get_item_details_for_record(self) -> tuple[str, str, str, int, bool]: # returns all current item info but not the overall category, also, casts the year to be an integer as it's already been validated before now so won't cause a ValueError
         return self.get_name(), self.get_subcategory(), self.get_description(), int(self.get_year()), self.get_confidence()
     
     def get_all_item_details_for_validation(self) -> list[str, str, str, str, str, bool]: # returns all item details, including the larger category
-        return [self.get_name(), self.get_subcategory(), self.get_category(), self.get_description(), self.get_year(), self.get_confidence()]
+        return self.get_name(), self.get_subcategory(), self.get_category(), self.get_description(), self.get_year(), self.get_confidence()
 
     def is_valid_record(self) -> bool: # returns if the current item's inputted data is valid, and updates the error message for whenever it isn't
         details = self.get_all_item_details_for_validation()
@@ -155,8 +155,8 @@ class RecordEntryWindow(Toplevel):
     def add_item_record(self): # inserts item record into the historical item table after updating the category table where necessary
         self.update_category()
         if self.is_valid_record():
-            print(self.get_item_details_for_record())
-            self.database.insert_into_item(self.get_item_details_for_record())
+            details = self.get_item_details_for_record()
+            self.database.insert_into_item(details[0],details[1],details[2],details[3],details[4],details[5])
             
             # def insert_into_item(self,name="NULL",subcategory="MISC",description = "NULL",year=-1,confidence=0):
  
