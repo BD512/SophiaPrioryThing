@@ -85,7 +85,7 @@ class DatabaseManager:
         column_names = self.get_column_names(self.item_table)[1:] # first column is autoincrement
         # print(f"INSERT INTO {self.item_table} {column_names} \
         #                     VALUES ({name},{subcategory},{description},{year},{confidence});")
-        # print(f"{name},{subcategory},{description},{year},{confidence}")
+        print(f"{name},{subcategory},{description},{year},{confidence}")
         self.cursor.execute(f"INSERT INTO {self.item_table} {column_names} \
                             VALUES ({name},{subcategory},{description},{year},{confidence});")
         self.conn.commit() # updates changes
@@ -241,7 +241,9 @@ if __name__ == "__main__":
     # database.insert_into_item(name="Cross",description="Very nice.",category="Crucifixes",year=2000)
     # d.insert_into_category("MISC","M")
     # print(d.get_category_dict(d.get_categories()))
-    print(d.get_categories())
+    # print(d.get_categories())
+    # d.insert_into_item("Book","Miscellaneous","boring",35,1)
+ 
     # print(database.get_category("Lecturns"))
     # print(database.get_subcategories("CS"))
     # print(database.get_category_dict(("S", "L", "CS", "P", "W", "E", "LC", "M")))
