@@ -140,8 +140,8 @@ class DatabaseManager:
             dictionary.update({category:subcategories})
         return dictionary
 
-    # method to display list of all items - can be sorted differently
-    def display_historic_items(self, order_by = "Name", order = "ASC", subcategory=None, category=None):
+    # method to return list of all items - can be sorted differently
+    def get_historic_items(self, order_by = "Name", order = "ASC", subcategory=None, category=None):
         # validation
         if subcategory in self.subcategories:
             where_statement = f"WHERE Subcategory = '{subcategory}'"

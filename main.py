@@ -1,8 +1,20 @@
 from database_manager import DatabaseManager
-from table import Table
+from table import Table, itemsListWidget,OptionsBar
+from tkinter import Tk
 
 if __name__ == "__main__":
     d = DatabaseManager()
+    win = Tk()
+    win.title("Historic Items - Priory")
+    win.resizable(False, False)
+    table = Table([], "text.bin",d)
+    list_widget = itemsListWidget(win, table)
+    items = d.get_historic_items()
+    list_widget.changeitemsShown(items)
+
+    OptionsBar(win, table, list_widget).pack()
+    list_widget.pack()
+    win.mainloop()
     # d.drop_tables()
     # d.create_database()
     # d.create_subcategories()

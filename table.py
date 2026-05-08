@@ -1,100 +1,199 @@
-from tkinter import Label, Frame
+from tkinter import ttk, Button, Toplevel, Label, Menu, Frame, Entry, Tk
+import pickle
 
-# a class that manages the table of data
-class Table(Frame): # this is an example of inheritance
-    def __init__(self,master,db_manager,bg_colour="white",font=("Arial",12)):
+class HistoricItem:
+    def __init__(self, name:str, subcategory:str, approx_year:str, description:str, no_images:int):
+        self.name = name
+        self.subcategory = subcategory
+        self.approx_year = approx_year
+        self.description = description
+        self.no_images = no_images
+
+    def get_name(self):
+        return self.name
+
+    def get_no_images(self):
+        return self.no_images
+
+    def get_subcategory(self):
+        return self.subcategory
+
+    def get_approx_year(self):
+        return self.approx_year
+
+    def get_description(self):
+        return self.description
+
+    def set_name(self, name):
+        self.name = name
+
+    def set_images(self, images):
+        self.images = images
+
+    def set_subcategory(self, subcategory):
+        self.subcategory = subcategory
+
+    def set_description(self, description):
+        self.description = description
+
+    def set_approx_year(self, approx_year):
+        self.approx_year = approx_year
+
+class Table(list):
+    def __init__(self, items, filename:str, db_manager):
+        super().__init__()
+        self.db = db_manager
+        self.read_from_db()
+        self.extend(items)
+
+    def read_from_db(self):
+        self.clear()
+        data = self.db.get_historic_items()
+        self.extend([HistoricItem(record[0], record[1], record[2], record[3], record[4]) for record in data])
+
+    def deleteHistoricItem(self, HistoricItem):
+        self.remove(HistoricItem)
+        self.writeToFile()
+
+    def addNew(self, name, subcategory, approx_year, description:float, images:bool):
+        self.append(HistoricItem(name, subcategory, approx_year, description, images))
+        self.writeToFile()
+
+class itemsListWidget(ttk.Treeview):
+    def __init__(self, master, items:Table):
+        super().__init__(master, show="headings", columns=("c1", "c2", "c3", "c4", "c5"), height=4)
+        self.items = items
+        self.items_shown = items
+        self.column("#1")
+        self.heading("#1", text="Name")
+        self.column("#2")
+        self.heading("#2", text="Subcategory")
+        self.column("#3")
+        self.heading("#3", text="Approx Year")
+        self.column("#4")
+        self.heading("#4", text="Description")
+        self.column("#5")
+        self.heading("#5", text="Images")
+        self.showitems()
+        self.right_click_options = Menu(self, tearoff=0) ######## self might have to be a Tk instance??
+        self.right_click_options.add_command(label="Edit", command=self.editSelection)
+        self.right_click_options.add_command(label="Delete", command=self.deleteSelection)
+        self.bind("<Button-3>", self.showRightClickOptions)
+
+    def getSelection(self):
+        return self.selection()
+
+    def editSelection(self):
+        pass
+        # HistoricItem = self.items.findHistoricItemFromname(self.getSelection()[0])
+        # EditHistoricItemWidget(self, HistoricItem, self.update_items)
+
+        # print(self.getSelection()[0].get_subcategory())
+    def deleteSelection(self):
+        pass
+        # HistoricItem = self.items.findHistoricItemFromname(self.getSelection()[0])
+        # self.items.deleteHistoricItem(HistoricItem)
+        # if HistoricItem in self.items_shown:
+        #     self.items_shown.remove(HistoricItem)
+        # self.update_items()
+
+    def showRightClickOptions(self, event):
+        row_id = self.identify_row(event.y)
+        if row_id is not None:
+            self.selection_set(row_id)
+            self.right_click_options.post(event.x_root, event.y_root)
+
+    def clear(self):
+        for child in self.get_children():
+            self.delete(child)
+
+    def showitems(self):
+        for HistoricItem in self.items_shown:
+            print(HistoricItem.get_name())
+            self.show_historic_item(HistoricItem)
+
+    def show_historic_item(self, HistoricItem):
+        self.insert('', "end", iid=HistoricItem.get_name(), values=(HistoricItem.get_name(), HistoricItem.get_subcategory(), HistoricItem.get_approx_year(), f"£{HistoricItem.get_description():.2f}", "yes" if HistoricItem.isimages() else "no"))
+
+    def update_items(self):
+        self.clear()
+        self.showitems()
+        self.items.writeToFile()
+
+    def change_items_shown(self, items):
+        self.items_shown = items
+        self.update_items()
+
+class SearchBox(Frame):
+    def __init__(self, master, items, list_widget):
         super().__init__(master)
-        self.master = master # window
-        self.db_manager = db_manager
-        self.font = font
-        self.bg_colour = bg_colour
-        self.order_by = ""
-        self.order = ""
-        self.headings, self.data = self.get_data()
-        self.title_text="Data currently held in tblHistoricItems"
+        self.items = items
+        self.list_widget = list_widget
+        Label(self, text="Search:").grid(row=0, column=0)
+        self.search_entry = Entry(self)
+        self.search_entry.grid(row=0, column=1)
+        self.search_entry.bind("<KeyRelease>", self.searchAndUpdate)
 
-    # method that binds the change_sort method to certain headers and updates the text colours
-    def bind_headers(self):
-        for i in self.headers:
-            self.set_colour(i) # makes all text black explicitly 
-            # system default looks black, but is stored as SystemButtonText
-            if self.headers.index(i) > 1: i.bind("<Button>",self.change_sort) # cannot order by rank or username
-        self.set_colour(self.headers[2],"#84B987")
+    def searchAndUpdate(self, event=None):
+        items = self.items.searchByPhrase(self.search_entry.get())
+        self.list_widget.change_items_shown(items)
 
-    # method that allows the leaderboard to be sorted differently depending on what headers are clicked
-    # if you keep clicking the same header, it will switch between ASC (red) / DESC (green) 
-    def change_sort(self,event):
-        column_names = self.db_manager.get_leaderboard_column_names()
-        if event.widget["foreground"] == "#000000": # means new column was selected
-            self.set_colour(event.widget,"#84B987")
-            self.order = "DESC"
-            for i in self.headers: # sets all other widgets to black
-                if i != event.widget: self.set_colour(i) 
-        elif event.widget["foreground"] == "#84B987":
-            self.set_colour(event.widget,"#9D716B")
-            self.order = "ASC"
-        else: 
-            self.set_colour(event.widget,"#84B987")
-            self.order = "DESC"
-        # gets actual column name (key) from the display name the user sees (value) 
-        self.order_by = [key for key, value in column_names.items() if value == event.widget["text"]][0]
-        self.recalculate_data()
-        
-    # method to change text colour of widget. default text is black 
-    def set_colour(self,widget,colour="#000000"):
-        widget["foreground"] = colour
+class OptionsBar(Frame):
+    def __init__(self, master, items, list_widget):
+        super().__init__(master)
+        self.items = items
+        self.list_widget = list_widget
+        self.search_box = SearchBox(self, self.items, list_widget)
+        self.search_box.grid(row=0, column=0)
+        Button(self, text="Add", command=self.addHistoricItem).grid(row=0, column=1)
 
-    # getter that returns result of SQL query as a list of tuples
-    def get_data(self):
-        return self.db_manager.get_leaderboard(self.singleplayer,order_by=self.order_by,order=self.order,
-                                               table1_difficulty=self.table1_difficulty)
+    def addHistoricItem(self):
+        pass
+        #AddNewHistoricItemWidget(self, self.items, self.search_box.searchAndUpdate)
 
-    # setter to change value of table1_difficulty attribute
-    def set_table_difficulty(self, difficulty):
-        self.table1_difficulty = difficulty
+class DropDownSelectWidget(Frame):
+    def __init__(self, master, options, starting_option):
+        super().__init__(master)
+        self.option_menu = ttk.Combobox(self, values=options)
+        self.option_menu.set(starting_option)
+        self.option_menu.grid(row=0, column=0)
 
-    # updates heading and data tuples before showing leaderboard
-    def recalculate_data(self):
-        self.headings, self.data = self.get_data()
-        self.show_leaderboard()
+    def getSelection(self) -> str:
+        return self.option_menu.get()
 
-    # destroys all children
-    def clear_leaderboard(self):
-        for widget in self.winfo_children():
-            if widget not in self.headers:
-                widget.destroy()
+class HistoricItemInfoEntry(Frame):
+    def __init__(self, master, approx_years, name="", subcategory="", approx_year=None, description=10, is_images=True):
+        super().__init__(master)
+        Label(self, text="name").grid(row=0, column=0, padx=10, pady=10)
+        self.name_entry = Entry(self)
+        self.name_entry.insert(0, name)
+        self.name_entry.grid(row=0, column=1, padx=10, pady=5)
+        Label(self, text="subcategory").grid(row=1, column=0, padx=10, pady=5)
+        self.subcategory_entry = Entry(self)
+        self.subcategory_entry.insert(0, subcategory)
+        self.subcategory_entry.grid(row=1, column=1, padx=10, pady=5)
+        Label(self, text="approx_year").grid(row=2, column=0, padx=10, pady=5)
+        self.approx_year_entry = DropDownSelectWidget(self, approx_years, approx_year if approx_year else approx_years[0])
+        self.approx_year_entry.grid(row=2, column=1, padx=10, pady=5)
+        Label(self, text="description £").grid(row=3, column=0, padx=10, pady=5)
+        self.description_entry = Entry(self)
+        self.description_entry.insert(0, str(description))
+        self.description_entry.grid(row=3, column=1, padx=10, pady=5)
+        Label(self, text="Is images").grid(row=4, column=0, padx=10, pady=5)
+        self.is_images_entry = DropDownSelectWidget(self, ["Yes", "No"], "Yes" if is_images else "No")
+        self.is_images_entry.grid(row=4, column=1, padx=10, pady=5)
 
-    # method that displays top/lowest 5 scores, with column headings
-    def show_leaderboard(self):
-        self.clear_leaderboard()
-        # increases font size by 40% for title
-        title = Label(self,font=(self.font[0],int(self.font[1]*1.4)), text = self.title_text)
-        # calculates dimensions of "table"
-        row_number = len(self.data)
-        column_number = len(self.headings)
-        column_width = [len(i) for i in self.headings]
-        # adds title to the leaderboard
-        title.grid(row=0,column=0,columnspan=column_number)
-        # creates labels for each field and places them in a grid,
-        # creating the appearance of a table
-        for i in range(0,row_number):
-            for j in range(column_number):
-                field = Label(self,font=self.font,width=column_width[j],
-                              bg=self.bg_colour, text = self.data[i][j])
-                field.grid(row=i+2,column=j)
-        self.show_message()
+    def get_name(self):
+        return self.name_entry.get()
 
-    # separate method to place headers as headers only need to be placed when the leaderboard is first shown
-    def show_headers(self):
-        # creates the heading labels and places them in a row
-        self.headers = []
-        for i in range(len(self.headings)):
-            header = Label(self,font=self.font, text = self.headings[i])
-            self.headers.append(header)
-            header.grid(row=1,column=i)
-        self.bind_headers()
+    def get_subcategory(self):
+        return self.subcategory_entry.get()
 
-    # method to show explanatory message
-    def show_message(self):
-        message = Label(self,text="Press the headers to re-sort the leaderboard!",font=("Helvetica",12))
-        message.grid(row=7,pady=20,columnspan=6)
+    def get_approx_year(self):
+        return self.approx_year_entry.getSelection()
+
+    def get_description(self):
+        return self.description_entry.get()
+
+    def getIsimages(self):
+        return self.is_images_entry.getSelection()
