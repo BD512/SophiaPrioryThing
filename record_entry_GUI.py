@@ -80,10 +80,10 @@ class RecordEntryWindow(Toplevel):
     def get_confidence(self) -> bool:
         return bool(self.confidence_level.get()) # doesn't need to be validated so can be cast in the getter, unlike year
 
-    def get_item_details_for_record(self) -> str, str, str, int, bool: # returns all current item info but not the overall category, also, casts the year to be an integer as it's already been validated before now so won't cause a ValueError
+    def get_item_details_for_record(self) -> tuple[str, str, str, int, bool]: # returns all current item info but not the overall category, also, casts the year to be an integer as it's already been validated before now so won't cause a ValueError
         return self.get_name(), self.get_subcategory(), self.get_description(), int(self.get_year()), self.get_confidence()
     
-    def get_all_item_details_for_validation(self) -> list[str, str, str, str, str, bool]: # returns all item details, including the larger category
+    def get_all_item_details_for_validation(self) -> list[str| bool]: # returns all item details, including the larger category
         return [self.get_name(), self.get_subcategory(), self.get_category(), self.get_description(), self.get_year(), self.get_confidence()]
 
     def is_valid_record(self) -> bool: # returns if the current item's inputted data is valid, and updates the error message for whenever it isn't
