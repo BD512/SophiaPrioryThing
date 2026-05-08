@@ -79,6 +79,7 @@ class DatabaseManager:
         if year < 0: year = "NULL" # years in AD must be positive
         temp = [name,subcategory,description]
         for i in range(len(temp)):
+            if not i: temp[i] = "NULL" # empty string is falsy
             if temp[i] != "NULL":
                 temp[i] = f"'{temp[i]}'" # adds extra speech marks around strings
         name,subcategory,description = temp # unpacks after updating
