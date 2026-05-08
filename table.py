@@ -71,7 +71,12 @@ class itemsListWidget(ttk.Treeview):
             self.show_historic_item(record)
 
     def show_historic_item(self, record):
-        self.insert('', "end", iid=record[0], values=(record[0], record[1], record[2], record[3], "yes" if record[4] == 0 else "tba"))
+        record = list(record) # cast to list so you can edit
+        for i in range(len(record)):
+            if record[i] == None:
+                record[i] = "N/A" # more understandable for user
+        self.insert('', "end", iid=record[0], values=(record[0], record[1], record[2], record[3], 
+                    "No images available" if record[4] == 0 else "Click to view images"))
 
     def update_items(self):
         self.clear()
