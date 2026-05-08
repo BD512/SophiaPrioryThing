@@ -70,13 +70,13 @@ class RecordEntryWindow(Toplevel):
         return self.name_entry.get().title()
     
     def get_category(self) -> str:
-        return self.category_menu.get()
+        return self.category_menu.get().title()
 
     def get_subcategory(self) -> str:
-        return self.subcategory_menu.get()
+        return self.subcategory_menu.get().title()
 
     def get_description(self) -> str:
-        return self.description_entry.get("1.0", "end-1c")
+        return self.description_entry.get("1.0", "end-1c").title()
 
     def get_year(self) -> str:
         return self.year_entry.get()
@@ -160,7 +160,7 @@ class RecordEntryWindow(Toplevel):
         self.update_category()
         if self.is_valid_record():
             details = self.get_item_details_for_record()
-            self.database.insert_into_item(details[0],details[1],details[2],details[3],details[4],details[5])
+            self.database.insert_into_item(details[0],details[1],details[2],details[3],details[4])
             
             # def insert_into_item(self,name="NULL",subcategory="MISC",description = "NULL",year=-1,confidence=0):
  
