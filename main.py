@@ -1,5 +1,5 @@
 from database_manager import DatabaseManager
-from table import Table, itemsListWidget
+from table import HistoricItems, Table
 from tkinter import Tk
 
 if __name__ == "__main__":
@@ -7,8 +7,8 @@ if __name__ == "__main__":
     win = Tk()
     win.title("Historic Items - Priory")
     win.resizable(False, False)
-    table = Table([],d)
-    list_widget = itemsListWidget(win, table)
+    items = HistoricItems(d)
+    list_widget = Table(win, items)
     list_widget.update_items()
     #OptionsBar(win, table, list_widget).pack()
     list_widget.pack()

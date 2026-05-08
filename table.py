@@ -1,11 +1,10 @@
-from tkinter import ttk, Label, Menu, Frame, Entry
+from tkinter import ttk, Menu, Frame
 
-class Table(list):
-    def __init__(self, items, db_manager):
+class HistoricItems(list):
+    def __init__(self, db_manager):
         super().__init__()
         self.db = db_manager
         self.read_from_db()
-        self.extend(items)
 
     def read_from_db(self):
         self.clear()
@@ -16,8 +15,8 @@ class Table(list):
         self.remove(record)
         #self.db.drop_record()
 
-class itemsListWidget(ttk.Treeview):
-    def __init__(self, master, items:Table):
+class Table(ttk.Treeview):
+    def __init__(self, master, items:HistoricItems):
         super().__init__(master, show="headings", columns=("c1", "c2", "c3", "c4", "c5"), height=4)
         self.items = items
         self.items_shown = items
@@ -83,20 +82,6 @@ class itemsListWidget(ttk.Treeview):
     def change_items_shown(self, items):
         self.items_shown = items
         self.update_items()
-
-class SearchBox(Frame):
-    def __init__(self, master, items, list_widget):
-        super().__init__(master)
-        self.items = items
-        self.list_widget = list_widget
-        Label(self, text="Search:").grid(row=0, column=0)
-        self.search_entry = Entry(self)
-        self.search_entry.grid(row=0, column=1)
-        self.search_entry.bind("<KeyRelease>", self.searchAndUpdate)
-
-    def searchAndUpdate(self, event=None):
-        items = self.items.searchByPhrase(self.search_entry.get())
-        self.list_widget.change_items_shown(items)
 
 class DropDownSelectWidget(Frame):
     def __init__(self, master, options, starting_option):
