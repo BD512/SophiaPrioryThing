@@ -83,6 +83,9 @@ class DatabaseManager:
                 temp[i] = f"'{temp[i]}'" # adds extra speech marks around strings
         name,subcategory,description = temp # unpacks after updating
         column_names = self.get_column_names(self.item_table)[1:] # first column is autoincrement
+        # print(f"INSERT INTO {self.item_table} {column_names} \
+        #                     VALUES ({name},{subcategory},{description},{year},{confidence});")
+        # print(f"{name},{subcategory},{description},{year},{confidence}")
         self.cursor.execute(f"INSERT INTO {self.item_table} {column_names} \
                             VALUES ({name},{subcategory},{description},{year},{confidence});")
         self.conn.commit() # updates changes
@@ -108,27 +111,39 @@ class DatabaseManager:
         category = temp[0][0]
         return category
     
-    # method to return the list of subcategories for a given category
-    def get_subcategories(self, category:str) -> list[str]:
-        statement = f"SELECT Subcategory FROM {self.category_table} WHERE Category='{category}' ;"
-        self.cursor.execute(statement)
-        temp = self.cursor.fetchall() # not yet in a usable format
-        subcategory_list = list()
-        for subcategory in temp:
-            subcategory_list.append(subcategory[0])
-        return subcategory_list
-    
-    def get_categories(self) -> list[str]:
-        statement = f"SELECT Category FROM {self.category_table} ;"
-        self.cursor.execute(statement)
-        temp = self.cursor.fetchall() # not yet in a usable format
-        category_list = list()
-        for category in temp:
-            category_list.append(category[0])
-        return category_list
+    # method to return the list of subcategories for a given category, and all subcategories if there isn't a given category
+    def get_subcategories(self, category=None) -> list[str]:
+        if category:
+            statement = f"SELECT Subcategory FROM {self.category_table} WHERE Category='{category}' ;"
+
+            self.cursor.execute(statement)
+            temp = self.cursor.fetchall() # not yet in a usable format
+            subcategory_list = list()
+            for subcategory in temp:
+                subcategory_list.append(subcategory[0])
+            return subcategory_list
+        
+        else:
+            subcategories = self.get_column(f"{self.category_table}","Subcategory")
+            for i in range(len(subcategories)):
+                subcategories[i] = subcategories[i][0]
+
+            return subcategories
+
+
+        
+    def get_categories(self) -> tuple: # returns a tuple of all categories
+        categories = self.get_column(f"{self.category_table}","Category")
+        category_tuple = []
+        for i in range(len(categories)):
+            categories[i] = categories[i][0]
+            if categories[i] not in category_tuple:
+                category_tuple.append(categories[i])
+        category_tuple.sort()
+        return tuple(category_tuple)
     
     # method to return a dictionary of categories and their associated list of categories
-    def get_category_dict(self, categories=None) -> dict: 
+    def get_category_dict(self, categories=None) -> dict: # returns all categories and subcategories if there is not a given category
         # returns a dictionary where the keys are the category and the values are lists of associated subcategories
         if not categories:
             categories = self.get_column(f"{self.item_table}","Category")
@@ -225,7 +240,8 @@ if __name__ == "__main__":
     # testing
     # database.insert_into_item(name="Cross",description="Very nice.",category="Crucifixes",year=2000)
     # d.insert_into_category("MISC","M")
-    print(d.get_category_dict(d.get_categories()))
+    # print(d.get_category_dict(d.get_categories()))
+    print(d.get_categories())
     # print(database.get_category("Lecturns"))
     # print(database.get_subcategories("CS"))
     # print(database.get_category_dict(("S", "L", "CS", "P", "W", "E", "LC", "M")))
