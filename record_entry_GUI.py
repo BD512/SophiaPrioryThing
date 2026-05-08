@@ -11,7 +11,7 @@ class RecordEntryWindow(Toplevel):
         self.database = DatabaseManager()
 
         self.confidence_level = IntVar()
-        self.categories = ("S", "L", "CS", "P", "W", "E", "LC", "M")  # set categories, should be gotten from the database - fix this
+        self.categories = self.database.get_categories()
 
         Label(self, text="Item name:").grid(row=0, column=0, padx=10, pady=(5, 0), sticky="nsew")
         self.name_entry = Entry(self)
@@ -21,14 +21,14 @@ class RecordEntryWindow(Toplevel):
         self.category_menu = ttk.Combobox(self, values=self.categories)
         self.category_menu.grid(row=1, column=1, padx=10, pady=0, sticky="nsew")
         self.category_menu.bind('<<ComboboxSelected>>', self.update_subcategory_menu)
-        self.category_menu.set("M")
+        self.category_menu.set("Miscellaneous")
 
         self.category_dict = self.database.get_category_dict(self.categories)
         # print(self.category_dict)
         # print(self.category_dict["M"])
 
         Label(self, text="Subcategory:").grid(row=2, column=0, padx=10, pady=0, sticky="nsew")
-        self.subcategory_menu = ttk.Combobox(self, values=self.category_dict["M"])  # default selection is miscellaneous
+        self.subcategory_menu = ttk.Combobox(self, values=self.category_dict["Miscellaneous"])  # default selection is miscellaneous
         self.subcategory_menu.grid(row=2, column=1, padx=10, pady=10, sticky="nsew")
         self.subcategory_menu.bind('<FocusIn>', self.update_subcategory_menu)
         self.subcategory_menu.bind('<Button-1>',self.update_subcategory_menu)
@@ -46,7 +46,7 @@ class RecordEntryWindow(Toplevel):
                                                offvalue=0)
         self.confident_check.grid(row=5, column=1, padx=10, pady=10, sticky="nsew")
 
-        addBtn = Button(self, text="Add item", command=self.test) # the final submit button
+        addBtn = Button(self, text="Add item", command=self.add_item_record) # the final submit button
         addBtn.grid(row=6, column=1, padx=10, pady=10, sticky="nsew")
 
         self.errorMsg = Label(self, text="", width=25, wraplength=120, fg="#da4646") # the error message to update depending on the input of 
@@ -63,7 +63,7 @@ class RecordEntryWindow(Toplevel):
         self.errorMsg.config(text=text)
 
     def get_name(self) -> str:
-        return self.name_entry.get()
+        return self.name_entry.get().title()
     
     def get_category(self) -> str:
         return self.category_menu.get()
@@ -80,8 +80,8 @@ class RecordEntryWindow(Toplevel):
     def get_confidence(self) -> bool:
         return bool(self.confidence_level.get()) # doesn't need to be validated so can be cast in the getter, unlike year
 
-    def get_item_details_for_record(self) -> tuple[str, str, str, int, bool]: # returns all current item info but not the overall category, also, casts the year to be an integer as it's already been validated before now so won't cause a ValueError
-        return self.get_name(), self.get_subcategory(), self.get_description(), int(self.get_year()), self.get_confidence()
+    def get_item_details_for_record(self) -> list[str, str, str, int, bool]: # returns all current item info but not the overall category, also, casts the year to be an integer as it's already been validated before now so won't cause a ValueError
+        return [self.get_name(), self.get_subcategory(), self.get_description(), int(self.get_year()), self.get_confidence()]
     
     def get_all_item_details_for_validation(self) -> list[str, str, str, str, str, bool]: # returns all item details, including the larger category
         return [self.get_name(), self.get_subcategory(), self.get_category(), self.get_description(), self.get_year(), self.get_confidence()]
@@ -153,10 +153,12 @@ class RecordEntryWindow(Toplevel):
         return False
 
     def add_item_record(self): # inserts item record into the historical item table after updating the category table where necessary
-
         self.update_category()
         if self.is_valid_record():
             self.database.insert_into_item(self.get_item_details_for_record())
+            print(self.get_item_details_for_record())
+            # def insert_into_item(self,name="NULL",subcategory="MISC",description = "NULL",year=-1,confidence=0):
+ 
 
     def test(self): # testinggg!
         self.is_valid_record()
