@@ -7,11 +7,10 @@ if __name__ == "__main__":
     win = Tk()
     win.title("Historic Items - Priory")
     win.resizable(False, False)
-    table = Table([], "text.bin",d)
+    table = Table([],d)
     list_widget = itemsListWidget(win, table)
     items = d.get_historic_items()
-    list_widget.changeitemsShown(items)
-
+    list_widget.update_items()
     OptionsBar(win, table, list_widget).pack()
     list_widget.pack()
     win.mainloop()
