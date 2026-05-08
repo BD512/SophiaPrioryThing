@@ -1,6 +1,7 @@
 from tkinter import Tk, Label, Entry, ttk, Text, IntVar, Button, Toplevel
 from database_manager import DatabaseManager
 from datetime import date
+from ImagesUpload import FilesUpload
 
 class RecordEntryWindow(Toplevel):
     def __init__(self, master):
@@ -46,11 +47,14 @@ class RecordEntryWindow(Toplevel):
                                                offvalue=0)
         self.confident_check.grid(row=5, column=1, padx=10, pady=10, sticky="nsew")
 
-        addBtn = Button(self, text="Add item", command=self.add_item_record) # the final submit button
-        addBtn.grid(row=6, column=1, padx=10, pady=10, sticky="nsew")
+        self.files_upload = FilesUpload(self)
+        self.files_upload.grid(row=6, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
 
-        self.errorMsg = Label(self, text="", width=25, wraplength=120, fg="#da4646") # the error message to update depending on the input of 
-        self.errorMsg.grid(row=6, column=0)
+        add_btn = Button(self, text="Add item", command=self.add_item_record) # the final submit button
+        add_btn.grid(row=7, column=1, padx=10, pady=10, sticky="nsew")
+
+        self.error_msg = Label(self, text="", width=25, wraplength=120, fg="#da4646") # the error message to update depending on the input of
+        self.error_msg.grid(row=7, column=0)
 
         # testBtn = Button(self, text="test", command=self.test)
         # testBtn.grid(row=6, column=1)
@@ -60,7 +64,7 @@ class RecordEntryWindow(Toplevel):
         self.subcategory_menu.config(values=self.category_dict[current_category])
 
     def update_error_msg(self, text):
-        self.errorMsg.config(text=text)
+        self.error_msg.config(text=text)
 
     def get_name(self) -> str:
         return self.name_entry.get().title()
