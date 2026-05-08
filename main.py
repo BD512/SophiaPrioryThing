@@ -1,5 +1,5 @@
 from database_manager import DatabaseManager
-from table import Table, itemsListWidget,OptionsBar
+from table import Table, itemsListWidget
 from tkinter import Tk
 
 if __name__ == "__main__":
@@ -9,9 +9,8 @@ if __name__ == "__main__":
     win.resizable(False, False)
     table = Table([],d)
     list_widget = itemsListWidget(win, table)
-    items = d.get_historic_items()
     list_widget.update_items()
-    OptionsBar(win, table, list_widget).pack()
+    #OptionsBar(win, table, list_widget).pack()
     list_widget.pack()
     win.mainloop()
     # d.drop_tables()

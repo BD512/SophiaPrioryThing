@@ -1,5 +1,4 @@
-from tkinter import ttk, Button, Toplevel, Label, Menu, Frame, Entry, Tk
-import pickle
+from tkinter import ttk, Label, Menu, Frame, Entry
 
 class Table(list):
     def __init__(self, items, db_manager):
@@ -67,7 +66,6 @@ class itemsListWidget(ttk.Treeview):
 
     def show_items(self):
         for record in self.items_shown:
-            print(record[0])
             self.show_historic_item(record)
 
     def show_historic_item(self, record):
@@ -99,19 +97,6 @@ class SearchBox(Frame):
     def searchAndUpdate(self, event=None):
         items = self.items.searchByPhrase(self.search_entry.get())
         self.list_widget.change_items_shown(items)
-
-class OptionsBar(Frame):
-    def __init__(self, master, items, list_widget):
-        super().__init__(master)
-        self.items = items
-        self.list_widget = list_widget
-        self.search_box = SearchBox(self, self.items, list_widget)
-        self.search_box.grid(row=0, column=0)
-        Button(self, text="Add", command=self.addrecord).grid(row=0, column=1)
-
-    def addrecord(self):
-        pass
-        #add_new_itemrecordWidget(self, self.items, self.search_box.searchAndUpdate)
 
 class DropDownSelectWidget(Frame):
     def __init__(self, master, options, starting_option):
