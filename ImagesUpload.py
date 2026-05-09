@@ -1,6 +1,7 @@
 from tkinter import filedialog, Tk, Button, Frame, StringVar, Entry, Menu
 from tkinter.ttk import Treeview
 import os
+import shutil
 
 class FileUpload(Frame):
     def __init__(self, master, uploaded_file_func, file_types: list = [("all", "*.*")]):
@@ -14,7 +15,7 @@ class FileUpload(Frame):
         # self.box_contents = StringVar()
         # self.path_entry = Entry(self, state="readonly", textvariable=self.box_contents)
         # self.path_entry.grid(column=0, row=0)
-        self.upload_button = Button(self, text='Find', bd='5', command=self.findAndSavePath)
+        self.upload_button = Button(self, text='Upload', bd='5', command=self.findAndSavePath)
         self.upload_button.grid(column=0, row=0, sticky="nsew")
 
     def selectFilePath(self) -> str:
@@ -93,24 +94,30 @@ class FilesPathsList(Treeview):
     def getImagePaths(self) -> list:
         return self.image_paths
 
-class FilesUpload(Frame):
-    def __init__(self, master, file_paths: list=None):
+class FilesUpload(Frame): # todo make only show image name and allow to click on it to show the image
+    def __init__(self, master, file_paths: list=None, final_folder: str = None):
         super().__init__(master)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
+        self.final_folder = final_folder
         if file_paths is None: file_paths = []
         self.files_upload_list = FilesPathsList(self, file_paths)
         self.files_upload_list.grid(row=0, column=0, sticky="nsew")
-        self.file_upload = FileUpload(self, self.uploadedFile, file_paths)
+        self.file_upload = FileUpload(self, self.uploadFile, file_paths)
         self.file_upload.grid(row=1, column=0, sticky="nsew")
 
-    def uploadedFile(self):
+    def uploadFile(self):
         path = self.file_upload.getPath()
+        # todo add the error checking and file copying here
         self.files_upload_list.addImageFilePath(path)
 
     def getPaths(self) -> list:
         return self.files_upload_list.getImagePaths()
+
+    def copyToCommonFolder(self, path):
+        if self.final_folder is not None:
+            shutil.copy(path, self.final_folder)
 
 
 
