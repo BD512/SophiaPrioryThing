@@ -114,9 +114,10 @@ class FilesUpload(Frame):
 
 
 
-
 if __name__ == "__main__":
     # todo - once the file paths have been selected, move to single folder
+    # todo validate file types
+    # todo don't let upload same file multiple times
     a = Tk()
     a.rowconfigure(0, weight=1)
     a.columnconfigure(0, weight=1)
