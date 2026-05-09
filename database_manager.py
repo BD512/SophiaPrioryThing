@@ -89,6 +89,7 @@ class DatabaseManager:
         # print(f"{name},{subcategory},{description},{year},{confidence}")
         self.cursor.execute(f"INSERT INTO {self.item_table} {column_names} \
                             VALUES (?, ?, ?, ?, ?);", (name, subcategory, description, year, confidence))
+        print("should be adding it tp the table?")
         self.conn.commit() # updates changes
 
     # method to insert a new record into matching category table
@@ -133,7 +134,7 @@ class DatabaseManager:
 
     # method to return id number of first item with that name
     def get_id_number(self,name):
-        self.cursor.execute(f"SELECT IDNumber FROM {self.item_table} WHERE Name=?",(name,))
+        self.cursor.execute(f"SELECT IDNumber FROM {self.item_table} WHERE IDNumber=?",(name,))
         return self.cursor.fetchone()[0]
         
     def get_categories(self) -> tuple: # returns a tuple of all categories
@@ -188,7 +189,7 @@ class DatabaseManager:
             ORDER BY {order_by} IS NULL, {order_by} {order}
             """)
         self.cursor.execute(f"""
-            SELECT Name, Subcategory,
+            SELECT {self.item_table}.IDNumber, Name, Subcategory,
             CASE 
                 WHEN Confidence = 1 THEN Year 
                 ELSE "c. " || Year 

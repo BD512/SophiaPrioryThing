@@ -10,12 +10,13 @@ class HistoricItems(list):
     def read_from_db(self, order_by = "Name", order = "ASC", subcategory=None, category=None):
         self.clear()
         data = self.db.get_historic_items(order_by,order,subcategory,category)
-        self.extend([(record[0], record[1], record[2], record[3], record[4]) for record in data])
+        self.extend([(record[0], record[1], record[2], record[3], record[4], record[5]) for record in data])
 
     def delete_historic_item(self, record):
-        id = self.db.get_id_number(record[0])
-        if id:
-            self.db.delete_record(id)
+        identifier = self.db.get_id_number(record[0])
+        print(identifier)
+        if identifier:
+            self.db.delete_record(identifier)
         self.read_from_db() # update list view 
 
 class Table(ttk.Treeview):
@@ -80,6 +81,7 @@ class Table(ttk.Treeview):
 
     def show_items(self):
         for record in self.items_shown:
+            print(record)
             self.show_historic_item(record)
 
     def show_historic_item(self, record):
@@ -87,8 +89,9 @@ class Table(ttk.Treeview):
         for i in range(len(record)):
             if record[i] == None:
                 record[i] = "N/A" # more understandable for user
-        self.insert('', "end", iid=record[0], values=(record[0], record[1], record[2], record[3], 
-                    "No images available" if record[4] == 0 else "Click to view images"))
+        # iid should be the primary key
+        self.insert('', "end", iid=record[0], values=(record[1], record[2], record[3], record[4],
+                    "No images available" if record[5] == 0 else "Click to view images"))
 
     def update_items(self):
         self.clear()
