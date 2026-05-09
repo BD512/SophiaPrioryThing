@@ -172,8 +172,21 @@ class DatabaseManager:
             where_statement = ""
         if order not in ("ASC","DESC"):
             order="ASC" # reverts to default
-        if order_by not in ("Name","Subcategory","approx Year","Description","Number of Images"):
+        if order_by not in ("Name","Subcategory","Year","Description","[Number of Images]"):
             order_by = "Name"
+        
+        print(f"""
+            SELECT Name, Subcategory,
+            CASE 
+                WHEN Confidence = 1 THEN Year 
+                ELSE "c. " || Year 
+            END AS [approx Year],
+            Description,
+            COUNT (ImagePath) OVER (PARTITION BY {self.item_table}.IDNumber) AS [Number of Images]
+            FROM {self.item_table} LEFT JOIN {self.image_table} ON {self.item_table}.IDNumber = {self.image_table}.IDNumber
+            {where_statement}
+            ORDER BY {order_by} IS NULL, {order_by} {order}
+            """)
         self.cursor.execute(f"""
             SELECT Name, Subcategory,
             CASE 

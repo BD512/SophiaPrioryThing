@@ -7,9 +7,9 @@ class HistoricItems(list):
         self.db = db_manager
         self.read_from_db()
 
-    def read_from_db(self):
+    def read_from_db(self, order_by = "Name", order = "ASC", subcategory=None, category=None):
         self.clear()
-        data = self.db.get_historic_items()
+        data = self.db.get_historic_items(order_by,order,subcategory,category)
         self.extend([(record[0], record[1], record[2], record[3], record[4]) for record in data])
 
     def delete_historic_item(self, record):
@@ -25,7 +25,7 @@ class Table(ttk.Treeview):
         self.items_shown = items
         style = ttk.Style()
         style.configure("Treeview.Heading", font=('Helvetica', 10), foreground="black")
-        self.columns={"#1":"Name", "#2":"Subcategory", "#3":"Approx Year", "#4":"Description", "#5":"Images"}
+        self.columns={"#1":"Name", "#2":"Subcategory", "#3":"approx Year", "#4":"Description", "#5":"Images"}
         for key,value in self.columns.items():
             self.column(key)
             self.heading(key, text=value, command = partial(self.sort_column,key,False))
@@ -43,7 +43,12 @@ class Table(ttk.Treeview):
     def sort_column(self, index, reverse_flag):
         if reverse_flag: order="DESC"
         else: order= "ASC"
+        order_by = self.columns.get(index)
+        if order_by == "Images": order_by = "[Number of Images]"
+        elif order_by == "approx Year": order_by = "Year"
         print(f"Sorting column '{index}', reverse: {reverse_flag}")
+        self.items.read_from_db(order_by=order_by,order=order) # type: ignore
+        self.update_items()
         # toggle the sorting direction for the next click
         self.heading(index, command=partial(self.sort_column,index,not reverse_flag))
 
