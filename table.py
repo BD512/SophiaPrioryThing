@@ -1,4 +1,5 @@
 from tkinter import ttk, Menu, Frame
+from functools import partial
 
 class HistoricItems(list):
     def __init__(self, db_manager):
@@ -19,18 +20,32 @@ class HistoricItems(list):
 
 class Table(ttk.Treeview):
     def __init__(self, master, items:HistoricItems):
-        super().__init__(master, show="headings", columns=("#1", "#2", "#3", "#4", "#5"), height=5)
+        super().__init__(master, show="headings", columns=("c1", "c2", "c3", "c4", "c5"), height=10)
         self.items = items
         self.items_shown = items
-        columns={"#1":"Name", "#2":"Subcategory", "#3":"Approx Year", "#4":"Description", "#5":"Images"}
-        for key,value in columns.items():
+        style = ttk.Style()
+        style.configure("Treeview.Heading", font=('Helvetica', 10), foreground="black")
+        self.columns={"#1":"Name", "#2":"Subcategory", "#3":"Approx Year", "#4":"Description", "#5":"Images"}
+        for key,value in self.columns.items():
             self.column(key)
-            self.heading(key, text=value)
+            self.heading(key, text=value, command = partial(self.sort_column,key,False))
+            #self.bind("<Button>",self.change_sort)
+            #self.set_colour(key) # makes all text black explicitly 
+            # system default looks black, but is stored as SystemButtonText
+        # Alter the Treeview's heading styles after creation
         self.show_items()
-        self.right_click_options = Menu(self, tearoff=0) ######## self might have to be a Tk instance??
+        self.right_click_options = Menu(self, tearoff=0) # self might have to be a Tk instance?
         self.right_click_options.add_command(label="Edit", command=self.editSelection)
         self.right_click_options.add_command(label="Delete", command=self.deleteSelection)
         self.bind("<Button-3>", self.showRightClickOptions)
+
+    # This is a basic example function to show the command is triggered
+    def sort_column(self, index, reverse_flag):
+        if reverse_flag: order="DESC"
+        else: order= "ASC"
+        print(f"Sorting column '{index}', reverse: {reverse_flag}")
+        # toggle the sorting direction for the next click
+        self.heading(index, command=partial(self.sort_column,index,not reverse_flag))
 
     def getSelection(self):
         return self.selection()
