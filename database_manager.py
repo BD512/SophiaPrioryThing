@@ -75,19 +75,20 @@ class DatabaseManager:
         self.conn.commit() # updates changes
 
     # method to insert a new record into historic items table
-    def insert_into_item(self,name="NULL",subcategory="MISC",description = "NULL",year=-1,confidence=0):
-        if year < 0: year = "NULL" # years in AD must be positive
-        temp = [name,subcategory,description]
-        for i in range(len(temp)):
-            if temp[i] != "NULL":
-                temp[i] = f"'{temp[i]}'" # adds extra speech marks around strings
-        name,subcategory,description = temp # unpacks after updating
+    def insert_into_item(self,name:str|None=None,subcategory="MISC",description:str|None = None,year=-1,confidence=0):
+        if year < 0: year = None # years in AD must be positive
+        if description == "": description = None
+        # temp = [name,subcategory,description]
+        # for i in range(len(temp)):
+            # if temp[i] != "NULL":
+                # temp[i] = f"'{temp[i]}'" # adds extra speech marks around strings
+        # name,subcategory,description = temp # unpacks after updating
         column_names = self.get_column_names(self.item_table)[1:] # first column is autoincrement
-        # print(f"INSERT INTO {self.item_table} {column_names} \
-        #                     VALUES ({name},{subcategory},{description},{year},{confidence});")
+        print(f"INSERT INTO {self.item_table} {column_names} \
+                            VALUES ({name},{subcategory},{description},{year},{confidence});")
         print(f"{name},{subcategory},{description},{year},{confidence}")
         self.cursor.execute(f"INSERT INTO {self.item_table} {column_names} \
-                            VALUES ({name},{subcategory},{description},{year},{confidence});")
+                            VALUES (?, ?, ?, ?, ?);", (name, subcategory, description, year, confidence))
         self.conn.commit() # updates changes
 
     # method to insert a new record into matching category table

@@ -76,7 +76,7 @@ class RecordEntryWindow(Toplevel):
         return self.subcategory_menu.get().title()
 
     def get_description(self) -> str:
-        return self.description_entry.get("1.0", "end-1c").title()
+        return self.description_entry.get("1.0", "end-1c").capitalize()
 
     def get_year(self) -> str:
         return self.year_entry.get()
@@ -85,8 +85,11 @@ class RecordEntryWindow(Toplevel):
         return bool(self.confidence_level.get()) # doesn't need to be validated so can be cast in the getter, unlike year
 
     def get_item_details_for_record(self) -> tuple[str, str, str, int, bool]: # returns all current item info but not the overall category, also, casts the year to be an integer as it's already been validated before now so won't cause a ValueError
-        return self.get_name(), self.get_subcategory(), self.get_description(), int(self.get_year()), self.get_confidence()
-    
+        try:
+            return self.get_name(), self.get_subcategory(), self.get_description(), int(self.get_year()), self.get_confidence()
+        except ValueError:
+            return self.get_name(), self.get_subcategory(), self.get_description(), -1, self.get_confidence()
+
     def get_all_item_details_for_validation(self) -> list[str, str, str, str, str, bool]: # returns all item details, including the larger category
         return [self.get_name(), self.get_subcategory(), self.get_category(), self.get_description(), self.get_year(), self.get_confidence()]
 
@@ -103,7 +106,7 @@ class RecordEntryWindow(Toplevel):
             return False
 
         else:
-            if details[4]: # if there is a year entered, check that it is valid
+            if details[4] != "": # if there is a year entered, check that it is valid
                 try:
                     item_year = int(details[4])
 
