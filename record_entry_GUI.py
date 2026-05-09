@@ -9,6 +9,7 @@ class RecordEntryWindow(Toplevel):
         self.grid_rowconfigure((0, 1, 2, 3, 4, 5, 6), weight=1)
         self.grid_columnconfigure((0, 1, 2), weight=1)
 
+        self.add_item = True
         self.database = DatabaseManager()
 
         self.confidence_level = IntVar()
@@ -51,9 +52,16 @@ class RecordEntryWindow(Toplevel):
         self.files_upload = FilesUpload(self)
         self.files_upload.grid(row=6, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
 
-        add_btn = Button(self, text="Add item", command=self.add_item_record) # the final submit button
-        add_btn.grid(row=7, column=1, padx=10, pady=10, sticky="nsew")
 
+        if self.add_item:
+            action_btn = Button(self, text="Add item", command=self.add_item_record) # the final submit button
+        
+        else: # must be editing
+            action_btn = Button(self, text="Edit item", command=self.add_item_record) # the final submit button
+
+        action_btn.grid(row=7, column=1, padx=10, pady=10, sticky="nsew")
+
+    
         self.error_msg = Label(self, text="", width=25, wraplength=120, fg="#da4646") # the error message to update depending on the input of
         self.error_msg.grid(row=7, column=0)
 
