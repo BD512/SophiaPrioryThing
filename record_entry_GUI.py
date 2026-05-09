@@ -13,6 +13,7 @@ class RecordEntryWindow(Toplevel):
 
         self.confidence_level = IntVar()
         self.categories = self.database.get_categories()
+        self.subcategories = self.database.get_subcategories()
 
         Label(self, text="Item name:").grid(row=0, column=0, padx=10, pady=(5, 0), sticky="nsew")
         self.name_entry = Entry(self)
@@ -61,7 +62,12 @@ class RecordEntryWindow(Toplevel):
 
     def update_subcategory_menu(self, event): 
         current_category = self.category_menu.get()
-        self.subcategory_menu.config(values=self.category_dict[current_category])
+        try:
+            self.subcategory_menu.config(values=self.category_dict[current_category])
+
+        except KeyError: # if the current category is new
+            self.subcategory_menu.config(values=[])
+
 
     def update_error_msg(self, text):
         self.error_msg.config(text=text)
@@ -93,6 +99,12 @@ class RecordEntryWindow(Toplevel):
     def get_all_item_details_for_validation(self) -> list[str, str, str, str, str, bool]: # returns all item details, including the larger category
         return [self.get_name(), self.get_subcategory(), self.get_category(), self.get_description(), self.get_year(), self.get_confidence()]
 
+    def get_database_categories(self):
+        return self.database.get_categories()
+    
+    def get_database_subcategories(self):
+        return self.database.get_subcategories()
+
     def is_valid_record(self) -> bool: # returns if the current item's inputted data is valid, and updates the error message for whenever it isn't
         details = self.get_all_item_details_for_validation()
         not_null_details = self.get_all_item_details_for_validation()
@@ -104,26 +116,27 @@ class RecordEntryWindow(Toplevel):
         if "" in not_null_details: # because details[3] is the description, which is allowed to be an empty string
             self.update_error_msg("Make sure to enter all necesary item details (name and categories)")
             return False
+        
+        if self.update_category():
 
-        else:
-            if details[4] != "": # if there is a year entered, check that it is valid
-                try:
-                    item_year = int(details[4])
+                if details[4] != "": # if there is a year entered, check that it is valid
+                    try:
+                        item_year = int(details[4])
 
-                    if item_year > date.today().year:
-                        self.update_error_msg("This year hasn't happened yet")
+                        if item_year > date.today().year:
+                            self.update_error_msg("This year hasn't happened yet")
+                            return False
+                        
+                        elif item_year < 0:
+                            self.update_error_msg("Year must be positive AD")
+                            return False
+                        
+                    except ValueError:
+                        self.update_error_msg("Make sure the year is an integer number")
                         return False
-                    
-                    elif item_year < 0:
-                        self.update_error_msg("Year must be positive AD")
-                        return False
-                    
-                except ValueError:
-                    self.update_error_msg("Make sure the year is an integer number")
-                    return False
-            
-            self.update_error_msg("")
-            return True
+                
+                self.update_error_msg("")
+                return True
 
         # TODO:
         # add more validation? did i miss anything? it's 1:30am so i probably did
@@ -137,33 +150,49 @@ class RecordEntryWindow(Toplevel):
         # lol i haven't tested this at allllllllllllllllll
         # need to add method to database manager to get categories instead of having that hard-coded tuple in the initialisation of this toplevel
 
-    def update_category(self): # if there is a new category or subcategory, it is added to the database's matching category table accordingly
-
+    def update_category(self): # if there is a new category or subcategory, it is added to the database's matching category table accordingly, returns whether this was successful
+        print("updating category")
         if self.is_new_category():
             if self.is_new_subcategory():
-                self.database.insert_into_category(self.get_subcategory(),self.get_category(),"")
+                self.database.insert_into_category(self.get_subcategory(),self.get_category(),None)
+                return True
 
             else: # cannot have duplicate subcategories even with different categories - subcategories must be unique
                 self.update_error_msg("If you are adding a new category, the subcategory must also be new")
+                return False
 
         elif self.is_new_subcategory():
-            self.database.insert_into_category(self.get_subcategory(),self.get_category(),"") # subcategory description is currently blank - maybe instead could have something appear for sophia to add description
+            self.database.insert_into_category(self.get_subcategory(),self.get_category(),None) # subcategory description is currently None - maybe instead could have something appear for sophia to add description
+            return True
+        
+        else:
+            return True
 
     def is_new_category(self) -> bool: # method to return whether or not the current category is new
-        if self.get_category() not in self.categories:
+        if self.get_category() not in self.get_database_categories():
+            print("new category")
             return True
+        print("old category")
         return False
 
     def is_new_subcategory(self) -> bool: # method to check if the current subcategory already exists
-        if self.get_subcategory() not in self.database.get_subcategories():
+        # print(self.get_subcategory(), self.database.get_subcategories())
+        # print(self.get_subcategory() not in self.database.get_subcategories())
+        if self.get_subcategory() not in self.get_database_subcategories():
+            print("new subcategory")
             return True
+        print("old subcategory")
         return False
 
     def add_item_record(self): # inserts item record into the historical item table after updating the category table where necessary
-        self.update_category()
+        # self.update_category()
         if self.is_valid_record():
             details = self.get_item_details_for_record()
-            self.database.insert_into_item(details[0],details[1],details[2],details[3],details[4])
+            #print(details[3])
+            if details[3] != -1:
+                self.database.insert_into_item(details[0],details[1],details[2],details[3],details[4])
+            else: # enforce not being confident about the year if no year has been entered
+                self.database.insert_into_item(details[0],details[1],details[2],details[3],False)
             
             # def insert_into_item(self,name="NULL",subcategory="MISC",description = "NULL",year=-1,confidence=0):
  

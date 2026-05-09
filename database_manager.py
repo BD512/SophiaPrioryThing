@@ -86,16 +86,16 @@ class DatabaseManager:
         column_names = self.get_column_names(self.item_table)[1:] # first column is autoincrement
         print(f"INSERT INTO {self.item_table} {column_names} \
                             VALUES ({name},{subcategory},{description},{year},{confidence});")
-        print(f"{name},{subcategory},{description},{year},{confidence}")
+        # print(f"{name},{subcategory},{description},{year},{confidence}")
         self.cursor.execute(f"INSERT INTO {self.item_table} {column_names} \
                             VALUES (?, ?, ?, ?, ?);", (name, subcategory, description, year, confidence))
         self.conn.commit() # updates changes
 
     # method to insert a new record into matching category table
-    def insert_into_category(self,subcategory="MISC",category="MISC",description=""):
+    def insert_into_category(self,subcategory="MISC",category="MISC",description:str|None = None):
         column_names = self.get_column_names(self.category_table)
         self.cursor.execute(f"INSERT INTO {self.category_table} {column_names} \
-                            VALUES ('{subcategory}','{category}','{description}');")
+                            VALUES (? ,? , ?);",(subcategory,category,description))
         self.conn.commit() # updates changes
 
     # method to get image path/s from image id
