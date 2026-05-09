@@ -1,11 +1,10 @@
-from email.headerregistry import DateHeader
 from tkinter import Tk, Label, Entry, ttk, Text, IntVar, Button, Toplevel, Frame
 from database_manager import DatabaseManager
 from datetime import date
 from ImagesUpload import FilesUpload
 
 class RecordDetailsEntry(Frame):
-    def __init__(self, master, categories: tuple, category_dict: dict,):
+    def __init__(self, master, categories: tuple, category_dict: dict, name: str="", description: str="", category: str=None, subcategory: str=None, year: int=None):
         super().__init__(master)
         self.grid_rowconfigure((0, 1, 2, 3, 4, 5, 6), weight=1)
         self.grid_columnconfigure((0, 1, 2), weight=1)
@@ -14,13 +13,14 @@ class RecordDetailsEntry(Frame):
 
         Label(self, text="Item name:").grid(row=0, column=0, padx=10, pady=(5, 0), sticky="nsew")
         self.name_entry = Entry(self)
+        self.name_entry.insert(0, name)
         self.name_entry.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
 
         Label(self, text="Category:").grid(row=1, column=0, padx=10, pady=(5, 0), sticky="nsew")
         self.category_menu = ttk.Combobox(self, values=self.categories)
         self.category_menu.grid(row=1, column=1, padx=10, pady=0, sticky="nsew")
         self.category_menu.bind('<<ComboboxSelected>>', self.updateSubcategoryMenu)
-        self.category_menu.set("Miscellaneous")
+        self.category_menu.set("Miscellaneous" if category is None else category)
 
         self.category_dict = category_dict # self.database.get_category_dict(self.categories)
         # print(self.category_dict)
@@ -28,17 +28,19 @@ class RecordDetailsEntry(Frame):
 
         Label(self, text="Subcategory:").grid(row=2, column=0, padx=10, pady=0, sticky="nsew")
         self.subcategory_menu = ttk.Combobox(self, values=self.category_dict[
-            "Miscellaneous"])  # default selection is miscellaneous
+            "Miscellaneous"] if subcategory is None else subcategory)  # default selection is miscellaneous
         self.subcategory_menu.grid(row=2, column=1, padx=10, pady=10, sticky="nsew")
         self.subcategory_menu.bind('<FocusIn>', self.updateSubcategoryMenu)
         self.subcategory_menu.bind('<Button-1>', self.updateSubcategoryMenu)
 
         Label(self, text="Description:").grid(row=3, column=0, padx=10, pady=(5, 0), sticky="nsew")
         self.description_entry = Text(self, wrap="word", width=4, height=4)
+        self.description_entry.insert("1.0", description)
         self.description_entry.grid(row=3, column=1, pady=10, sticky="nsew")
 
         Label(self, text="Year:").grid(row=4, column=0, padx=10, pady=(5, 0))
         self.year_entry = Entry(self)
+        if year is not None: self.description_entry.insert(0, str(year))
         self.year_entry.grid(row=4, column=1, padx=10, pady=0)
 
         # Label(self, text="Year confidence:").grid(row=0, column=4, padx=(5,0), pady=10)
@@ -69,7 +71,6 @@ class RecordDetailsEntry(Frame):
         return bool(
             self.confidence_level.get())  # doesn't need to be validated so can be cast in the getter, unlike year
 
-
     def updateSubcategoryMenu(self, event):
         current_category = self.category_menu.get()
         if current_category in self.category_dict.keys():
@@ -78,7 +79,7 @@ class RecordDetailsEntry(Frame):
             self.subcategory_menu.config(values=[])
 
 class RecordDetailsWindow(Toplevel):
-    def __init__(self, master, database_manager: DatabaseManager):
+    def __init__(self, master, database_manager: DatabaseManager, name: str="", description: str="", category: str=None, subcategory: str=None, year: int=None):
         super().__init__(master)
         self.grid_rowconfigure((0, 1), weight=1)
         self.grid_columnconfigure((0, 1), weight=1)
@@ -88,7 +89,7 @@ class RecordDetailsWindow(Toplevel):
 
         categories = self.database.get_categories()
         self.record_entry = RecordDetailsEntry(self, self.database.get_categories(),
-                                               self.database.get_category_dict(categories))
+                                               self.database.get_category_dict(categories), name, description, category, subcategory, year)
         self.record_entry.grid(row=0, column=0, columnspan=2, sticky="nsew")
         self.action_btn = Button(self, text="Enter", command=self.enter_item)  # the final submit button
 
@@ -218,8 +219,8 @@ class RecordDetailsWindow(Toplevel):
 
 
 class AddItemWindow(RecordDetailsWindow):
-    def __init__(self, master):
-        super().__init__(master, DatabaseManager())
+    def __init__(self, master, database_manager:DatabaseManager):
+        super().__init__(master, database_manager)
         self.change_button_text("Add item")
 
     def enter_item(
@@ -237,19 +238,21 @@ class AddItemWindow(RecordDetailsWindow):
 
 
 class EditItemWindow(RecordDetailsWindow):
-    def __init__(self, master):
-        super().__init__(master, DatabaseManager())
+    def __init__(self, master, database_manager: DatabaseManager, last_item_id):
+        # todo get information of name of last item etc from database using item id
+        super().__init__(master, database_manager) # todo pass information got from database in as parameter here
         self.change_button_text("Edit item")
+        self.last_item_id = last_item_id
 
     def enter_item(self):
         if self.is_valid_record():
             details = self.get_item_details_for_record()
             if details[3] != -1:
-                pass
+                pass # todo add the stuff to edit the item here
             else:
-                pass
+                pass # todo add the stuff to edit the item here
 
 
 a = Tk()
-entry = AddItemWindow(a)
+entry = AddItemWindow(a, DatabaseManager())
 a.mainloop()
