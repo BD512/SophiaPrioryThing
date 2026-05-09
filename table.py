@@ -19,19 +19,13 @@ class HistoricItems(list):
 
 class Table(ttk.Treeview):
     def __init__(self, master, items:HistoricItems):
-        super().__init__(master, show="headings", columns=("c1", "c2", "c3", "c4", "c5"), height=4)
+        super().__init__(master, show="headings", columns=("#1", "#2", "#3", "#4", "#5"), height=5)
         self.items = items
         self.items_shown = items
-        self.column("#1")
-        self.heading("#1", text="Name")
-        self.column("#2")
-        self.heading("#2", text="Subcategory")
-        self.column("#3")
-        self.heading("#3", text="Approx Year")
-        self.column("#4")
-        self.heading("#4", text="Description")
-        self.column("#5")
-        self.heading("#5", text="Images")
+        columns={"#1":"Name", "#2":"Subcategory", "#3":"Approx Year", "#4":"Description", "#5":"Images"}
+        for key,value in columns.items():
+            self.column(key)
+            self.heading(key, text=value)
         self.show_items()
         self.right_click_options = Menu(self, tearoff=0) ######## self might have to be a Tk instance??
         self.right_click_options.add_command(label="Edit", command=self.editSelection)
