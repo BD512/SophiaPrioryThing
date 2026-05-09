@@ -1,41 +1,56 @@
-from tkinter import ttk, Label, Menu, Frame, Entry
+from tkinter import ttk, Menu, Frame
+from functools import partial
 
-class Table(list):
-    def __init__(self, items, db_manager):
+class HistoricItems(list):
+    def __init__(self, db_manager):
         super().__init__()
         self.db = db_manager
         self.read_from_db()
-        self.extend(items)
 
-    def read_from_db(self):
+    def read_from_db(self, order_by = "Name", order = "ASC", subcategory=None, category=None):
         self.clear()
-        data = self.db.get_historic_items()
+        data = self.db.get_historic_items(order_by,order,subcategory,category)
         self.extend([(record[0], record[1], record[2], record[3], record[4]) for record in data])
 
     def delete_historic_item(self, record):
-        self.remove(record)
-        #self.db.drop_record()
+        id = self.db.get_id_number(record[0])
+        if id:
+            self.db.delete_record(id)
+        self.read_from_db() # update list view 
 
-class itemsListWidget(ttk.Treeview):
-    def __init__(self, master, items:Table):
-        super().__init__(master, show="headings", columns=("c1", "c2", "c3", "c4", "c5"), height=4)
+class Table(ttk.Treeview):
+    def __init__(self, master, items:HistoricItems):
+        super().__init__(master, show="headings", columns=("c1", "c2", "c3", "c4", "c5"), height=10)
         self.items = items
         self.items_shown = items
-        self.column("#1")
-        self.heading("#1", text="Name")
-        self.column("#2")
-        self.heading("#2", text="Subcategory")
-        self.column("#3")
-        self.heading("#3", text="Approx Year")
-        self.column("#4")
-        self.heading("#4", text="Description")
-        self.column("#5")
-        self.heading("#5", text="Images")
+        style = ttk.Style()
+        style.configure("Treeview.Heading", font=('Helvetica', 10), foreground="black")
+        self.columns={"#1":"Name", "#2":"Subcategory", "#3":"approx Year", "#4":"Description", "#5":"Images"}
+        for key,value in self.columns.items():
+            self.column(key)
+            self.heading(key, text=value, command = partial(self.sort_column,key,False))
+            #self.bind("<Button>",self.change_sort)
+            #self.set_colour(key) # makes all text black explicitly 
+            # system default looks black, but is stored as SystemButtonText
+        # Alter the Treeview's heading styles after creation
         self.show_items()
-        self.right_click_options = Menu(self, tearoff=0) ######## self might have to be a Tk instance??
+        self.right_click_options = Menu(self, tearoff=0) # self might have to be a Tk instance?
         self.right_click_options.add_command(label="Edit", command=self.editSelection)
         self.right_click_options.add_command(label="Delete", command=self.deleteSelection)
         self.bind("<Button-3>", self.showRightClickOptions)
+
+    # This is a basic example function to show the command is triggered
+    def sort_column(self, index, reverse_flag):
+        if reverse_flag: order="DESC"
+        else: order= "ASC"
+        order_by = self.columns.get(index)
+        if order_by == "Images": order_by = "[Number of Images]"
+        elif order_by == "approx Year": order_by = "Year"
+        print(f"Sorting column '{index}', reverse: {reverse_flag}")
+        self.items.read_from_db(order_by=order_by,order=order) # type: ignore
+        self.update_items()
+        # toggle the sorting direction for the next click
+        self.heading(index, command=partial(self.sort_column,index,not reverse_flag))
 
     def getSelection(self):
         return self.selection()
@@ -47,12 +62,11 @@ class itemsListWidget(ttk.Treeview):
 
         # print(self.getSelection()[0][1])
     def deleteSelection(self):
-        pass
-        # record = self.items.findrecordFromname(self.getSelection()[0])
-        # self.items.delete_historic_item(record)
-        # if record in self.items_shown:
-        #     self.items_shown.remove(record)
-        # self.update_items()
+        record = self.getSelection()
+        self.items.delete_historic_item(record)
+        if record in self.items_shown:
+            self.items_shown.remove(record)
+        self.update_items()
 
     def showRightClickOptions(self, event):
         row_id = self.identify_row(event.y)
@@ -83,20 +97,6 @@ class itemsListWidget(ttk.Treeview):
     def change_items_shown(self, items):
         self.items_shown = items
         self.update_items()
-
-class SearchBox(Frame):
-    def __init__(self, master, items, list_widget):
-        super().__init__(master)
-        self.items = items
-        self.list_widget = list_widget
-        Label(self, text="Search:").grid(row=0, column=0)
-        self.search_entry = Entry(self)
-        self.search_entry.grid(row=0, column=1)
-        self.search_entry.bind("<KeyRelease>", self.searchAndUpdate)
-
-    def searchAndUpdate(self, event=None):
-        items = self.items.searchByPhrase(self.search_entry.get())
-        self.list_widget.change_items_shown(items)
 
 class DropDownSelectWidget(Frame):
     def __init__(self, master, options, starting_option):

@@ -131,7 +131,10 @@ class DatabaseManager:
 
             return subcategories
 
-
+    # method to return id number of first item with that name
+    def get_id_number(self,name):
+        self.cursor.execute(f"SELECT IDNumber FROM {self.item_table} WHERE Name=?",(name,))
+        return self.cursor.fetchone()[0]
         
     def get_categories(self) -> tuple: # returns a tuple of all categories
         categories = self.get_column(f"{self.category_table}","Category")
@@ -169,8 +172,21 @@ class DatabaseManager:
             where_statement = ""
         if order not in ("ASC","DESC"):
             order="ASC" # reverts to default
-        if order_by not in ("Name","Subcategory","approx Year","Description","Number of Images"):
+        if order_by not in ("Name","Subcategory","Year","Description","[Number of Images]"):
             order_by = "Name"
+        
+        print(f"""
+            SELECT Name, Subcategory,
+            CASE 
+                WHEN Confidence = 1 THEN Year 
+                ELSE "c. " || Year 
+            END AS [approx Year],
+            Description,
+            COUNT (ImagePath) OVER (PARTITION BY {self.item_table}.IDNumber) AS [Number of Images]
+            FROM {self.item_table} LEFT JOIN {self.image_table} ON {self.item_table}.IDNumber = {self.image_table}.IDNumber
+            {where_statement}
+            ORDER BY {order_by} IS NULL, {order_by} {order}
+            """)
         self.cursor.execute(f"""
             SELECT Name, Subcategory,
             CASE 
@@ -230,6 +246,10 @@ class DatabaseManager:
         self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Statues","Miscellaneous"))
         self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Wooden Chests","Miscellaneous"))
         self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Aumbry","Miscellaneous"))
+
+    def delete_record(self,id):
+        self.cursor.execute(f"DELETE FROM {self.item_table} WHERE IDNumber =?",(id,))
+        self.conn.commit()
 
     # method that commits changes and closes connection before a table object is garbage-collected
     def __del__(self):
