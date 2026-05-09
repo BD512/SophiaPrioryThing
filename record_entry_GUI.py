@@ -1,3 +1,4 @@
+from email.headerregistry import DateHeader
 from tkinter import Tk, Label, Entry, ttk, Text, IntVar, Button, Toplevel, Frame
 from database_manager import DatabaseManager
 from datetime import date
@@ -76,37 +77,38 @@ class RecordDetailsEntry(Frame):
         else:
             self.subcategory_menu.config(values=[])
 
-
-class RecordEntryWindow(Toplevel):
-    def __init__(self, master):
+class RecordDetailsWindow(Toplevel):
+    def __init__(self, master, database_manager: DatabaseManager):
         super().__init__(master)
         self.grid_rowconfigure((0, 1), weight=1)
         self.grid_columnconfigure((0, 1), weight=1)
 
         # self.add_item = True
-        self.database = DatabaseManager()
+        self.database = database_manager
+
         categories = self.database.get_categories()
-        self.record_entry = RecordDetailsEntry(self, self.database.get_categories(), self.database.get_category_dict(categories))
+        self.record_entry = RecordDetailsEntry(self, self.database.get_categories(),
+                                               self.database.get_category_dict(categories))
         self.record_entry.grid(row=0, column=0, columnspan=2, sticky="nsew")
-        action_btn = Button(self, text="Add item", command=self.add_item_record)  # the final submit button
+        self.action_btn = Button(self, text="Enter", command=self.enter_item)  # the final submit button
 
         # else:  # must be editing
-            # action_btn = Button(self, text="Edit item", command=self.add_item_record)  # the final submit button
+        # action_btn = Button(self, text="Edit item", command=self.add_item_record)  # the final submit button
 
-        action_btn.grid(row=1, column=1, padx=10, pady=10, sticky="nsew")
+        self.action_btn.grid(row=1, column=1, padx=10, pady=10, sticky="nsew")
 
         self.error_msg = Label(self, text="", width=25, wraplength=120,
                                fg="#da4646")  # the error message to update depending on the input of
         self.error_msg.grid(row=1, column=0)
 
-        # testBtn = Button(self, text="test", command=self.test)
-        # testBtn.grid(row=6, column=1)
+    def change_button_text(self, text):
+        self.action_btn.config(text=text)
 
-
+    def enter_item(self):
+        raise NotImplementedError
 
     def update_error_msg(self, text):
         self.error_msg.config(text=text)
-
 
     def get_item_details_for_record(self) -> tuple[
         str, str, str, int, bool]:  # returns all current item info but not the overall category, also, casts the year to be an integer as it's already been validated before now so won't cause a ValueError
@@ -194,20 +196,6 @@ class RecordEntryWindow(Toplevel):
         print("old subcategory")
         return False
 
-    def add_item_record(
-            self):  # inserts item record into the historical item table after updating the category table where necessary
-        # self.update_category()
-        if self.is_valid_record():
-            details = self.get_item_details_for_record()
-            # print(details[3])
-            if details[3] != -1:
-                self.database.insert_into_item(details[0], details[1], details[2], details[3], details[4])
-            else:  # enforce not being confident about the year if no year has been entered
-                self.database.insert_into_item(details[0], details[1], details[2], details[3], False)
-
-            # def insert_into_item(self,name="NULL",subcategory="MISC",description = "NULL",year=-1,confidence=0):
-
-
     def update_category(
             self):  # if there is a new category or subcategory, it is added to the database's matching category table accordingly, returns whether this was successful
         print("updating category")
@@ -229,6 +217,39 @@ class RecordEntryWindow(Toplevel):
             return True
 
 
+class AddItemWindow(RecordDetailsWindow):
+    def __init__(self, master):
+        super().__init__(master, DatabaseManager())
+        self.change_button_text("Add item")
+
+    def enter_item(
+            self):  # inserts item record into the historical item table after updating the category table where necessary
+        # self.update_category()
+        if self.is_valid_record():
+            details = self.get_item_details_for_record()
+            # print(details[3])
+            if details[3] != -1:
+                self.database.insert_into_item(details[0], details[1], details[2], details[3], details[4])
+            else:  # enforce not being confident about the year if no year has been entered
+                self.database.insert_into_item(details[0], details[1], details[2], details[3], False)
+
+            # def insert_into_item(self,name="NULL",subcategory="MISC",description = "NULL",year=-1,confidence=0):
+
+
+class EditItemWindow(RecordDetailsWindow):
+    def __init__(self, master):
+        super().__init__(master, DatabaseManager())
+        self.change_button_text("Edit item")
+
+    def enter_item(self):
+        if self.is_valid_record():
+            details = self.get_item_details_for_record()
+            if details[3] != -1:
+                pass
+            else:
+                pass
+
+
 a = Tk()
-entry = RecordEntryWindow(a)
+entry = AddItemWindow(a)
 a.mainloop()
