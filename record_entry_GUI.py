@@ -33,6 +33,7 @@ class RecordDetailsEntry(Frame):
         self.subcategory_menu.grid(row=2, column=1, padx=10, pady=10, sticky="nsew")
         #self.subcategory_menu.bind('<FocusIn>', self.update_subcategory_menu)
         self.subcategory_menu.bind('<Button-1>', self.update_subcategory_menu)
+        self.subcategory_menu.set("" if subcategory is None else subcategory)
 
         Label(self, text="Description:").grid(row=3, column=0, padx=10, pady=(5, 0), sticky="nsew")
         self.description_entry = Text(self, wrap="word", width=4, height=4)
@@ -237,9 +238,10 @@ class AddItemWindow(RecordDetailsWindow):
 
 class EditItemWindow(RecordDetailsWindow):
     def __init__(self, master, database_manager: DatabaseManager, item_id):
+        self.item_id = item_id
         self.database = database_manager
         self.item_details = self.database.get_item_from_id(item_id) # id, name, subcategory, description, year, confidence
-        print(self.item_details)
+        print(f"current details: {self.item_details}")
         d = self.get_item_details_to_fill()
         super().__init__(master, database_manager, d[0], d[1], d[2], d[3], d[4], d[5]) # todo pass information got from database in as parameter here
         self.title("Edit Item")
@@ -254,10 +256,11 @@ class EditItemWindow(RecordDetailsWindow):
     def enter_item(self):
         if self.is_valid_record():
             details = self.get_item_details_for_record()
+            print(f"new details are: {details}")
             if details[3] != -1:
-                self.database.edit_item_record(details[0], details[1], details[2], details[3], details[4])
+                self.database.edit_item_record(self.item_id, details[0], details[1], details[2], details[3], details[4])
             else:
-                self.database.edit_item_record(details[0], details[1], details[2], details[3], False)
+                self.database.edit_item_record(self.item_id, details[0], details[1], details[2], details[3], False)
             self.destroy()
 
 if __name__ == "__main__":
