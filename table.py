@@ -97,6 +97,11 @@ class Table(ttk.Treeview):
         self.clear()
         self.show_items()
 
+    def update_items_from_database(self):
+        self.clear()
+        self.items.read_from_db()
+        self.show_items()
+
     def change_items_shown(self, items):
         self.items_shown = items
         self.update_items()
