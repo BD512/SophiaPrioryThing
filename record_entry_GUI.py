@@ -49,7 +49,7 @@ class RecordDetailsEntry(Frame):
                                                offvalue=0)
         self.confident_check.grid(row=5, column=1, padx=10, pady=10, sticky="nsew")
 
-        self.files_upload = FilesUpload(self)
+        self.files_upload = FilesUpload(self, "test")
         self.files_upload.grid(row=6, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
 
     def getName(self) -> str:
@@ -213,6 +213,7 @@ class AddItemWindow(RecordDetailsWindow):
     def __init__(self, master, database_manager:DatabaseManager):
         super().__init__(master, database_manager)
         self.change_button_text("Add item")
+        self.title("Add Item")
 
     def enter_item(
             self):  # inserts item record into the historical item table after updating the category table where necessary
@@ -230,15 +231,15 @@ class AddItemWindow(RecordDetailsWindow):
 
 class EditItemWindow(RecordDetailsWindow):
     def __init__(self, master, database_manager: DatabaseManager, item_id):
-        # todo get information of name of last item etc from database using item id
-        # self.item_id = item_id
         self.database = database_manager
         self.item_details = self.database.get_item_from_id(item_id) # id, name, subcategory, description, year, confidence
         print(self.item_details)
         d = self.get_item_details_to_fill()
         super().__init__(master, database_manager, d[0], d[1], d[2], d[3], d[4], d[5]) # todo pass information got from database in as parameter here
+        self.title("Edit Item")
         self.change_button_text("Edit item")
         # name: str="", description: str="", category: str=None, subcategory: str=None, year: int=None, confidence):
+
     def get_item_details_to_fill(self) -> tuple:
         d = self.item_details
         category = self.database.get_category(d[2])
