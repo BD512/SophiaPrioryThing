@@ -53,7 +53,10 @@ class RecordDetailsEntry(Frame):
         self.files_upload = FilesUpload(self, "test")
         self.files_upload.grid(row=6, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
 
-    def getName(self) -> str:
+    def get_images(self) -> list:
+        return self.files_upload.getPaths()
+
+    def get_name(self) -> str:
         return self.name_entry.get().title()
 
     def get_category(self) -> str:
@@ -117,16 +120,17 @@ class RecordDetailsWindow(Toplevel):
         self.error_msg.config(text=text)
 
     def get_item_details_for_record(self) -> tuple[
-        str, str, str, int, bool]:  # returns all current item info but not the overall category, also, casts the year to be an integer as it's already been validated before now so won't cause a ValueError
+        str, str, str, int, bool, list]:  # returns all current item info but not the overall category, also, casts the year to be an integer as it's already been validated before now so won't cause a ValueError
         try:
-            return self.record_entry.getName(), self.record_entry.get_subcategory(), self.record_entry.get_description(), int(
-                self.record_entry.get_year()), self.record_entry.get_confidence()
+            print(self.record_entry.get_name())
+            return self.record_entry.get_name(), self.record_entry.get_subcategory(), self.record_entry.get_description(), int(
+                self.record_entry.get_year()), self.record_entry.get_confidence(), self.record_entry.get_images()
         except ValueError:
-            return self.record_entry.getName(), self.record_entry.get_subcategory(), self.record_entry.get_description(), -1, self.record_entry.get_confidence()
+            return self.record_entry.get_name(), self.record_entry.get_subcategory(), self.record_entry.get_description(), -1, self.record_entry.get_confidence(), self.record_entry.get_images()
 
     def get_all_item_details_for_validation(self) -> list[
         str|bool]:  # returns all item details, including the larger category
-        return [self.record_entry.getName(), self.record_entry.get_subcategory(), self.record_entry.get_category(), self.record_entry.get_description(), self.record_entry.get_year(),
+        return [self.record_entry.get_name(), self.record_entry.get_subcategory(), self.record_entry.get_category(), self.record_entry.get_description(), self.record_entry.get_year(),
                 self.record_entry.get_confidence()]
 
     def get_database_categories(self):
@@ -228,9 +232,9 @@ class AddItemWindow(RecordDetailsWindow):
             details = self.get_item_details_for_record()
             # print(details[3])
             if details[3] != -1:
-                self.database.insert_into_item(details[0], details[1], details[2], details[3], details[4])
+                self.database.insert_into_item(details[0], details[1], details[2], details[3], details[4], images=details[5])
             else:  # enforce not being confident about the year if no year has been entered
-                self.database.insert_into_item(details[0], details[1], details[2], details[3], False)
+                self.database.insert_into_item(details[0], details[1], details[2], details[3], False, images=details[5])
             self.destroy()
             # def insert_into_item(self,name="NULL",subcategory="MISC",description = "NULL",year=-1,confidence=0):
 
@@ -238,6 +242,7 @@ class AddItemWindow(RecordDetailsWindow):
 class EditItemWindow(RecordDetailsWindow):
     def __init__(self, master, database_manager: DatabaseManager, item_id):
         self.database = database_manager
+        self.item_id = item_id
         self.item_details = self.database.get_item_from_id(item_id) # id, name, subcategory, description, year, confidence
         print(self.item_details)
         d = self.get_item_details_to_fill()
@@ -255,9 +260,9 @@ class EditItemWindow(RecordDetailsWindow):
         if self.is_valid_record():
             details = self.get_item_details_for_record()
             if details[3] != -1:
-                self.database.edit_item_record(details[0], details[1], details[2], details[3], details[4])
+                self.database.edit_item_record(item_id=self.item_id, name=details[0], subcategory=details[1], description=details[2], year=details[3], confidence=details[4], images=details[5])
             else:
-                self.database.edit_item_record(details[0], details[1], details[2], details[3], False)
+                self.database.edit_item_record(item_id=self.item_id, name=details[0], subcategory=details[1], description=details[2], year=details[3], confidence=False, images=details[5])
             self.destroy()
 
 if __name__ == "__main__":
