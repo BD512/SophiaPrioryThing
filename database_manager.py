@@ -89,7 +89,17 @@ class DatabaseManager:
         # print(f"{name},{subcategory},{description},{year},{confidence}")
         self.cursor.execute(f"INSERT INTO {self.item_table} {column_names} \
                             VALUES (?, ?, ?, ?, ?);", (name, subcategory, description, year, confidence))
-        print("should be adding it tp the table?")
+        # print("should be adding it tp the table?")
+        self.conn.commit() # updates changes
+
+    def edit_item_record(self,item_id,name:str|None=None,subcategory="MISC",description:str|None = None,year=-1,confidence=0):
+        if year < 0: year = None # years in AD must be positive
+        if description == "": description = None
+        
+        print(f"{name},{subcategory},{description},{year},{confidence}")
+        self.cursor.execute(f"UPDATE {self.item_table} SET Name=?, Subcategory=?, Description=?, Year=?, Confidence=? \
+                            WHERE IDNumber=?);", (name,subcategory,description,year,confidence,),(item_id,))
+
         self.conn.commit() # updates changes
 
     # method to insert a new record into matching category table

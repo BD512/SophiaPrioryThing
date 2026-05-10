@@ -243,16 +243,17 @@ class EditItemWindow(RecordDetailsWindow):
         d = self.item_details
         category = self.database.get_category(d[2])
         return d[1], d[3], category, d[2], d[4], d[5]
+    
     def enter_item(self):
         if self.is_valid_record():
             details = self.get_item_details_for_record()
             if details[3] != -1:
-                pass # todo add the stuff to edit the item here
+                self.database.edit_item_record(details[0], details[1], details[2], details[3], details[4])
             else:
-                pass # todo add the stuff to edit the item here
+                self.database.edit_item_record(details[0], details[1], details[2], details[3], False)
 
 
 a = Tk()
 entry = AddItemWindow(a, DatabaseManager())
-edit = EditItemWindow(a, DatabaseManager(),10)
+edit = EditItemWindow(a, DatabaseManager(),5)
 a.mainloop()
