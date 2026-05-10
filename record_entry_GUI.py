@@ -4,7 +4,7 @@ from datetime import date
 from ImagesUpload import FilesUpload
 
 class RecordEntryWindow(Toplevel):
-    def __init__(self, master):
+    def __init__(self, master, start_item_name="", ):
         super().__init__(master)
         self.grid_rowconfigure((0, 1, 2, 3, 4, 5, 6), weight=1)
         self.grid_columnconfigure((0, 1, 2), weight=1)
