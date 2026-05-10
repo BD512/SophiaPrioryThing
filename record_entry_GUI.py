@@ -178,7 +178,7 @@ class RecordDetailsWindow(Toplevel):
         # with beth's edits, i swear now the categories being used inside some of these classes aren't updated as categories are added because they're attributes instead of getters? idk check this
 
     def is_new_category(self) -> bool:  # method to return whether or not the current category is new
-        print(self.record_entry.get_category(), self.get_database_categories())
+        # print(self.record_entry.get_category(), self.get_database_categories())
         if self.record_entry.get_category() not in self.get_database_categories():
             print("new category")
             return True
