@@ -4,7 +4,7 @@
 # if info needed from database to show options to add a record, this will be passed in as a parameter
 
 from tkinter import Tk, Label, Entry, ttk, Text, IntVar, Button, Toplevel
-from database_manager import DatabaseManager
+from FinalSophiaCode.database_manager import DatabaseManager
 
 class RecordEntryWindow(Toplevel):
     def __init__(self, master):

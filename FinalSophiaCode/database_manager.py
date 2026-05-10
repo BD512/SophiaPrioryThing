@@ -12,12 +12,12 @@ class DatabaseManager:
         self.cursor = self.conn.cursor()
         self.create_database() # created the tables in the database if they don't exist
         # it would be better programming if we got the below attributes from get_categories_dict
-        self.categories = ("Stalls","Liturgical Items","Crosses And Staves","Pulpit And Lecturn","Stained Glass Windows",\
+        self.categories = ("Stalls","Liturgical Items","Crosses And Staves","Pulpit And Lecturn","Stained Glass Windows",
                            "Embroidery","Lighting And Candles","Miscellaneous")
-        self.subcategories = ("Ancient Stalls","Bishop Stalls","Sedilia","Chalice","Ciborium","Collection Plate","Flagon",\
-                              "Paten","Thurible","Coptic Crosses","Processional Crosses","Crucifixes","Churchwarden Staves",\
-                              "Verges","Pulpit","Lecturn","Regimental Chapel","Main Church","Altar Frontals - High Altar",\
-                              "Altar Frontals - Other","Hassocks","Copes","Chasubles","Chandeliers","Altar Candles",\
+        self.subcategories = ("Ancient Stalls","Bishop Stalls","Sedilia","Chalice","Ciborium","Collection Plate","Flagon",
+                              "Paten","Thurible","Coptic Crosses","Processional Crosses","Crucifixes","Churchwarden Staves",
+                              "Verges","Pulpit","Lecturn","Regimental Chapel","Main Church","Altar Frontals - High Altar",
+                              "Altar Frontals - Other","Hassocks","Copes","Chasubles","Chandeliers","Altar Candles",
                               "Baptismal Fonts","Icons","Statues","Wooden Chests","Aumbry")
 
     # method that creates database and tables needed from scratch
@@ -69,6 +69,7 @@ class DatabaseManager:
     
     # method to insert a new record into image table
     def insert_into_image(self,ID_number:int,path:str):
+        print("Adding an image")
         column_names = self.get_column_names(self.image_table)
         self.cursor.execute(f"INSERT INTO {self.image_table} {column_names} \
                             VALUES ({ID_number},'{path}');")
@@ -76,6 +77,7 @@ class DatabaseManager:
 
     # method to insert a new record into historic items table
     def insert_into_item(self,name:str|None=None,subcategory="MISC",description:str|None = None,year=-1,confidence=0, images: list=None):
+        print("HEERE")
         if year < 0: year = None # years in AD must be positive
         if description == "": description = None
         # temp = [name,subcategory,description]
@@ -90,14 +92,17 @@ class DatabaseManager:
         self.cursor.execute(f"INSERT INTO {self.item_table} {column_names} \
                             VALUES (?, ?, ?, ?, ?);", (name, subcategory, description, year, confidence))
         # print("should be adding it tp the table?")
-        self.conn.commit() # updates changes
+        print("IMAGES")
+        print(images)
         if images is not None:
             self.add_images_for_item(self.cursor.lastrowid, images)
+        self.conn.commit()  # updates changes
 
     def edit_item_record(self,item_id,name:str|None=None,subcategory="MISC",description:str|None = None,year=-1,confidence=0, images: list=None):
+        print("editing item record")
+        print(name)
         if year < 0: year = None # years in AD must be positive
         if description == "": description = None
-        
         print(f"{name},{subcategory},{description},{year},{confidence}")
         self.cursor.execute(f"UPDATE {self.item_table} SET Name=?, Subcategory=?, Description=?, Year=?, Confidence=? \
                             WHERE IDNumber=?;", (name,subcategory,description,year,confidence,item_id,),)
@@ -122,10 +127,15 @@ class DatabaseManager:
         self.conn.commit() # updates changes
 
     # method to get image path/s from image id
-    def get_image_path(self,identifier:int):
-        statement = f"SELECT ImagePath FROM {self.image_table} WHERE IDNumber=? ;"
+    def get_image_paths(self, identifier:int) -> list:
+        statement = f"SELECT ImagePath FROM {self.image_table} WHERE IDNumber=?;"
         self.cursor.execute(statement,(identifier,)) # parameter must be passed in as tuple
-        return self.cursor.fetchall()[0]
+        images = self.cursor.fetchall()
+        print(f"IMAGES: {images}")
+        if len(images) == 0:
+            return []
+        else:
+            return images
     
     # method to get corresponding overarching category from the matching category table
     def get_category(self,subcategory:str) -> str:
@@ -228,7 +238,9 @@ class DatabaseManager:
             {where_statement}
             ORDER BY {order_by} IS NULL, {order_by} {order}
             """)
-        return self.cursor.fetchall()
+        a = self.cursor.fetchall()
+        print(a)
+        return a
     
     def drop_tables(self):
         self.cursor.execute(f"DROP TABLE {self.item_table};")
@@ -313,6 +325,7 @@ class DatabaseManager:
 
     def delete_record(self,identifier):
         self.cursor.execute(f"DELETE FROM {self.item_table} WHERE IDNumber =?", (identifier,))
+        self.delete_images_for_item(identifier)
         self.conn.commit()
 
     # method that commits changes and closes connection before a table object is garbage-collected

@@ -1,8 +1,8 @@
-from tkinter import ttk, Menu, Frame
+from tkinter import ttk, Menu, Frame, TclError
 from functools import partial
 from record_entry_GUI import EditItemWindow
-from database_manager import DatabaseManager
-
+from FinalSophiaCode.database_manager import DatabaseManager
+from ImageWindow import ImagesWindow
 
 class HistoricItems(list):
     def __init__(self, db_manager):
@@ -13,11 +13,12 @@ class HistoricItems(list):
     def read_from_db(self, order_by = "Name", order = "ASC", subcategory=None, category=None):
         self.clear()
         data = self.db.get_historic_items(order_by,order,subcategory,category)
+        print("DATA:")
+        print(data)
         self.extend([(record[0], record[1], record[2], record[3], record[4], record[5]) for record in data])
 
     def delete_historic_item(self, record):
         identifier = self.db.get_id_number(record[0])
-        print(identifier)
         if identifier:
             self.db.delete_record(identifier)
         self.read_from_db() # update list view 
@@ -42,6 +43,18 @@ class Table(ttk.Treeview):
         self.right_click_options.add_command(label="Edit", command=self.editSelection)
         self.right_click_options.add_command(label="Delete", command=self.deleteSelection)
         self.bind("<Button-3>", self.showRightClickOptions)
+        self.bind("<Button-1>", self.potentially_show_images_window)
+
+    def potentially_show_images_window(self, event):
+        region = self.identify("region", event.x, event.y)
+        if region == "cell":
+            col = self.identify_column(event.x)
+            row = self.identify_row(event.y) # the row iid
+            print(row)
+            if col == "#5" and row:
+                ImagesWindow(self, self.database, int(row))
+                # value = tree.set(row, col)
+                # show_popup(value)
 
     # This is a basic example function to show the command is triggered
     def sort_column(self, index, reverse_flag):
@@ -86,8 +99,8 @@ class Table(ttk.Treeview):
             self.delete(child)
 
     def show_items(self):
+        print(self.items)
         for record in self.items:
-            print(record)
             self.show_historic_item(record)
 
     def show_historic_item(self, record):
@@ -96,8 +109,12 @@ class Table(ttk.Treeview):
             if record[i] == None:
                 record[i] = "N/A" # more understandable for user
         # iid should be the primary key
-        self.insert('', "end", iid=record[0], values=(record[1], record[2], record[3], record[4],
+        # print(record[0], record[1])
+        try:
+            self.insert('', "end", iid=record[0], values=(record[1], record[2], record[3], record[4],
                     "No images available" if record[5] == 0 else "Click to view images"))
+        except TclError:
+            pass
 
     def update_items(self):
         self.clear()

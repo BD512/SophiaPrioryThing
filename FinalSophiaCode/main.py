@@ -1,4 +1,4 @@
-from database_manager import DatabaseManager
+from FinalSophiaCode.database_manager import DatabaseManager
 from table import Table
 from tkinter import Tk, Button
 from record_entry_GUI import AddItemWindow
@@ -7,19 +7,21 @@ class Main(Tk):
     def __init__(self):
         super().__init__()
         self.title("Historic Items - Priory")
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure((0, 1), weight=1)
         self.resizable(False, False)
         self.database_manager = DatabaseManager()
         # self.items = HistoricItems(self.database_manager)
-        Button(self, text="Add", command=self.addItem).grid(row=0, column=2)
+        Button(self, text="Add", command=self.addItem).grid(row=0, column=0, sticky="nsew")
         self.list_widget = Table(self, self.database_manager)
         self.list_widget.update_items_from_database()
-        self.list_widget.grid(row=1, column=0, columnspan=3)
+        self.list_widget.grid(row=1, column=0, sticky="nsew")
+
 
     def addItem(self):
         add_item = AddItemWindow(self, self.database_manager)
         self.wait_window(add_item)
         self.list_widget.update_items_from_database()
-        print("should have updated...")
         # self.update()
 
 

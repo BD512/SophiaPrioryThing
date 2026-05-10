@@ -147,6 +147,7 @@ class FilesUpload(Frame): # todo make only show image name and allow to click on
             new_path = Path(f"{current_path}\\{self.final_folder}\\{file_name_without_ext}{end_number}.{extension}")
             end_number += 1
         shutil.copyfile(path, new_path)
+        self.common_folder_paths.append(new_path)
 
 
 
