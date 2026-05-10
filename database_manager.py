@@ -12,8 +12,8 @@ class DatabaseManager:
         self.cursor = self.conn.cursor()
         self.create_database() # created the tables in the database if they don't exist
         # it would be better programming if we got the below attributes from get_categories_dict
-        self.categories = ("Stalls","Liturgical Items","Crosses and Staves","Pulpit and Lecturn","Stained Glass Windows",\
-                           "Embroidery","Lighting and Candles","Miscellaneous")
+        self.categories = ("Stalls","Liturgical Items","Crosses And Staves","Pulpit And Lecturn","Stained Glass Windows",\
+                           "Embroidery","Lighting And Candles","Miscellaneous")
         self.subcategories = ("Ancient Stalls","Bishop Stalls","Sedilia","Chalice","Ciborium","Collection Plate","Flagon",\
                               "Paten","Thurible","Coptic Crosses","Processional Crosses","Crucifixes","Churchwarden Staves",\
                               "Verges","Pulpit","Lecturn","Regimental Chapel","Main Church","Altar Frontals - High Altar",\
