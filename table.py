@@ -1,5 +1,8 @@
 from tkinter import ttk, Menu, Frame
 from functools import partial
+from record_entry_GUI import EditItemWindow
+from database_manager import DatabaseManager
+
 
 class HistoricItems(list):
     def __init__(self, db_manager):
@@ -20,10 +23,10 @@ class HistoricItems(list):
         self.read_from_db() # update list view 
 
 class Table(ttk.Treeview):
-    def __init__(self, master, items:HistoricItems):
+    def __init__(self, master, database: DatabaseManager):
         super().__init__(master, show="headings", columns=("c1", "c2", "c3", "c4", "c5"), height=10)
-        self.items = items
-        self.items_shown = items
+        self.database = database
+        self.items = HistoricItems(database)
         style = ttk.Style()
         style.configure("Treeview.Heading", font=('Helvetica', 10), foreground="black")
         self.columns={"#1":"Name", "#2":"Subcategory", "#3":"approx Year", "#4":"Description", "#5":"Images"}
@@ -57,7 +60,10 @@ class Table(ttk.Treeview):
         return self.selection()
 
     def editSelection(self):
-        pass
+        record = self.selection()[0]
+        edit_item_window = EditItemWindow(self, self.database, record)
+        self.wait_window(edit_item_window)
+        self.update_items_from_database()
         # record = self.items.findrecordFromname(self.getSelection()[0])
         # EditrecordWidget(self, record, self.update_items)
 
@@ -65,8 +71,8 @@ class Table(ttk.Treeview):
     def deleteSelection(self):
         record = self.getSelection()
         self.items.delete_historic_item(record)
-        if record in self.items_shown:
-            self.items_shown.remove(record)
+        if record in self.items:
+            self.items.remove(record)
         self.update_items()
 
     def showRightClickOptions(self, event):
@@ -80,7 +86,7 @@ class Table(ttk.Treeview):
             self.delete(child)
 
     def show_items(self):
-        for record in self.items_shown:
+        for record in self.items:
             print(record)
             self.show_historic_item(record)
 
@@ -103,7 +109,7 @@ class Table(ttk.Treeview):
         self.show_items()
 
     def change_items_shown(self, items):
-        self.items_shown = items
+        self.items = items
         self.update_items()
 
 class DropDownSelectWidget(Frame):

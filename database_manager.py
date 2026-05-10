@@ -100,7 +100,7 @@ class DatabaseManager:
         
         print(f"{name},{subcategory},{description},{year},{confidence}")
         self.cursor.execute(f"UPDATE {self.item_table} SET Name=?, Subcategory=?, Description=?, Year=?, Confidence=? \
-                            WHERE IDNumber=?);", (name,subcategory,description,year,confidence,item_id,),)
+                            WHERE IDNumber=?;", (name,subcategory,description,year,confidence,item_id,),)
         self.conn.commit() # updates changes
         self.delete_images_for_item(item_id)
         if images is not None: self.add_images_for_item(item_id, images)
@@ -160,7 +160,8 @@ class DatabaseManager:
         return self.cursor.fetchone()[0]
     
     # method to return tuple of details about an item from it's unique ID number
-    def get_item_from_id(self,item_id) -> tuple:
+    def get_item_from_id(self, item_id) -> tuple:
+        print(item_id)
         self.cursor.execute(f"SELECT * FROM {self.item_table} WHERE IDNumber=?",(item_id,))
         return self.cursor.fetchall()[0]
         
