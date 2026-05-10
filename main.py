@@ -1,18 +1,40 @@
 from database_manager import DatabaseManager
 from table import HistoricItems, Table
-from tkinter import Tk
+from tkinter import Tk, Button
+from record_entry_GUI import AddItemWindow
+
+class Main(Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Historic Items - Priory")
+        self.resizable(False, False)
+        self.database_manager = DatabaseManager()
+        self.items = HistoricItems(self.database_manager)
+        Button(self, text="Add", command=self.addItem).grid(row=0, column=2)
+        self.list_widget = Table(self, self.items)
+        self.list_widget.update_items_from_database()
+        self.list_widget.grid(row=1, column=0, columnspan=3)
+
+    def addItem(self):
+        add_item = AddItemWindow(self, self.database_manager)
+        self.wait_window(add_item)
+        self.list_widget.update_items_from_database()
+        print("should have updated...")
+        # self.update()
+
 
 if __name__ == "__main__":
-    d = DatabaseManager()
-    win = Tk()
-    win.title("Historic Items - Priory")
-    win.resizable(False, False)
-    items = HistoricItems(d)
-    list_widget = Table(win, items)
-    list_widget.update_items()
+    Main().mainloop()
+    # d = DatabaseManager()
+    # win = Tk()
+    # win.title("Historic Items - Priory")
+    # win.resizable(False, False)
+    # items = HistoricItems(d)
+    # list_widget = Table(win, items)
+    # list_widget.update_items()
     #OptionsBar(win, table, list_widget).pack()
-    list_widget.pack()
-    win.mainloop()
+    # list_widget.pack()
+    # win.mainloop()
     # d.drop_tables()
     # d.create_database()
     # d.create_subcategories()
