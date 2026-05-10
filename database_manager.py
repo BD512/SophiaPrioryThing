@@ -75,7 +75,7 @@ class DatabaseManager:
         self.conn.commit() # updates changes
 
     # method to insert a new record into historic items table
-    def insert_into_item(self,name:str|None=None,subcategory="MISC",description:str|None = None,year=-1,confidence=0):
+    def insert_into_item(self,name:str|None=None,subcategory="MISC",description:str|None = None,year=-1,confidence=0, images: list=None):
         if year < 0: year = None # years in AD must be positive
         if description == "": description = None
         # temp = [name,subcategory,description]
@@ -91,16 +91,28 @@ class DatabaseManager:
                             VALUES (?, ?, ?, ?, ?);", (name, subcategory, description, year, confidence))
         # print("should be adding it tp the table?")
         self.conn.commit() # updates changes
+        if images is not None:
+            self.add_images_for_item(self.cursor.lastrowid, images)
 
-    def edit_item_record(self,item_id,name:str|None=None,subcategory="MISC",description:str|None = None,year=-1,confidence=0):
+    def edit_item_record(self,item_id,name:str|None=None,subcategory="MISC",description:str|None = None,year=-1,confidence=0, images: list=None):
         if year < 0: year = None # years in AD must be positive
         if description == "": description = None
         
         print(f"{name},{subcategory},{description},{year},{confidence}")
         self.cursor.execute(f"UPDATE {self.item_table} SET Name=?, Subcategory=?, Description=?, Year=?, Confidence=? \
-                            WHERE IDNumber=?);", (name,subcategory,description,year,confidence,),(item_id,))
-
+                            WHERE IDNumber=?;", (name,subcategory,description,year,confidence,item_id,),)
         self.conn.commit() # updates changes
+        self.delete_images_for_item(item_id)
+        if images is not None: self.add_images_for_item(item_id, images)
+
+
+    def delete_images_for_item(self, id_number):
+        self.cursor.execute(f"DELETE FROM {self.image_table} WHERE IDNumber=?;", (id_number,))
+        self.conn.commit()
+
+    def add_images_for_item(self, id_number: int, images: list):
+        for image in images:
+            self.insert_into_image(id_number, image)
 
     # method to insert a new record into matching category table
     def insert_into_category(self,subcategory="MISC",category="MISC",description:str|None = None):
@@ -148,7 +160,8 @@ class DatabaseManager:
         return self.cursor.fetchone()[0]
     
     # method to return tuple of details about an item from it's unique ID number
-    def get_item_from_id(self,item_id) -> tuple:
+    def get_item_from_id(self, item_id) -> tuple:
+        print(item_id)
         self.cursor.execute(f"SELECT * FROM {self.item_table} WHERE IDNumber=?",(item_id,))
         return self.cursor.fetchall()[0]
         
@@ -298,8 +311,8 @@ class DatabaseManager:
         # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Wooden Chests","Miscellaneous"))
         # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Aumbry","Miscellaneous"))
 
-    def delete_record(self,id):
-        self.cursor.execute(f"DELETE FROM {self.item_table} WHERE IDNumber =?",(id,))
+    def delete_record(self,identifier):
+        self.cursor.execute(f"DELETE FROM {self.item_table} WHERE IDNumber =?", (identifier,))
         self.conn.commit()
 
     # method that commits changes and closes connection before a table object is garbage-collected

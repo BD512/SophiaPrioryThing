@@ -1,5 +1,5 @@
 from database_manager import DatabaseManager
-from table import HistoricItems, Table
+from table import Table
 from tkinter import Tk, Button
 from record_entry_GUI import AddItemWindow
 
@@ -9,9 +9,9 @@ class Main(Tk):
         self.title("Historic Items - Priory")
         self.resizable(False, False)
         self.database_manager = DatabaseManager()
-        self.items = HistoricItems(self.database_manager)
+        # self.items = HistoricItems(self.database_manager)
         Button(self, text="Add", command=self.addItem).grid(row=0, column=2)
-        self.list_widget = Table(self, self.items)
+        self.list_widget = Table(self, self.database_manager)
         self.list_widget.update_items_from_database()
         self.list_widget.grid(row=1, column=0, columnspan=3)
 
