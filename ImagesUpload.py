@@ -1,14 +1,16 @@
-from tkinter import filedialog, Tk, Button, Frame, StringVar, Entry, Menu
+from tkinter import filedialog, Tk, Button, Frame, Label, Menu, messagebox
 from tkinter.ttk import Treeview
 import os
 import shutil
+from pathlib import Path
 
 class FileUpload(Frame):
-    def __init__(self, master, uploaded_file_func, file_types: list = [("all", "*.*")]):
+    def __init__(self, master, uploaded_file_func, file_types: list= None):
         super().__init__(master)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
-        self.file_types = file_types
+        # self.file_types = [("all", "*.*")] if file_types is None else file_types
+        self.extensions = [("all", "*.*")] if file_types is None else file_types
         self.path = "\\"
         self.uploaded_file_func = uploaded_file_func
         # self.frame = Frame(root)
@@ -19,7 +21,8 @@ class FileUpload(Frame):
         self.upload_button.grid(column=0, row=0, sticky="nsew")
 
     def selectFilePath(self) -> str:
-        f = filedialog.askopenfile() # filetypes=self.file_types
+        print(self.extensions)
+        f = filedialog.askopenfile(filetypes=self.extensions) # filetypes=self.file_types
         if f:
             filepath = os.path.abspath(f.name)
             return filepath
@@ -95,38 +98,61 @@ class FilesPathsList(Treeview):
         return self.image_paths
 
 class FilesUpload(Frame): # todo make only show image name and allow to click on it to show the image
-    def __init__(self, master, file_paths: list=None, final_folder: str = None):
+    def __init__(self, master, final_folder: str, file_paths: list=None):
         super().__init__(master)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
+        self.common_folder_paths = []
+        self.original_paths = []
         self.final_folder = final_folder
         if file_paths is None: file_paths = []
         self.files_upload_list = FilesPathsList(self, file_paths)
         self.files_upload_list.grid(row=0, column=0, sticky="nsew")
-        self.file_upload = FileUpload(self, self.uploadFile, file_paths)
+        self.file_upload = FileUpload(self, self.uploadFile)
         self.file_upload.grid(row=1, column=0, sticky="nsew")
+        # self.error_message = Label(self)
+        # self.error_message.grid(row=2, column=0, sticky="nsew")
+
+    # def changeErrorMessage(self, new_message: str):
+        # self.error_message.configure(text=new_message)
+
+    @staticmethod
+    def showDuplicateFileErrorMessage():
+        # self.changeErrorMessage("File already uploaded for this item")
+        messagebox.showinfo("Duplicate File", "File already uploaded for this item")
 
     def uploadFile(self):
         path = self.file_upload.getPath()
+        if path not in self.original_paths:
+            self.original_paths.append(path)
+            self.files_upload_list.addImageFilePath(os.path.basename(path))
+            self.copyToCommonFolder(path)
+        else:
+            self.showDuplicateFileErrorMessage()
         # todo add the error checking and file copying here
-        self.files_upload_list.addImageFilePath(path)
+        # self.files_upload_list.addImageFilePath(path)
 
     def getPaths(self) -> list:
-        return self.files_upload_list.getImagePaths()
+        return self.common_folder_paths
 
     def copyToCommonFolder(self, path):
-        if self.final_folder is not None:
-            shutil.copy(path, self.final_folder)
+        current_path = os.getcwd()
+        file_name = os.path.basename(path)
+        file_name_without_ext, extension = os.path.splitext(file_name)
+        new_path = Path(f"{current_path}\\{self.final_folder}\\{file_name}")
+        end_number = 1
+        if not Path(f"{current_path}\\{self.final_folder}").exists(): os.mkdir(f"{current_path}\\{self.final_folder}")
+        while new_path.exists():
+            new_path = Path(f"{current_path}\\{self.final_folder}\\{file_name_without_ext}{end_number}.{extension}")
+            end_number += 1
+        shutil.copyfile(path, new_path)
 
 
 
 if __name__ == "__main__":
-    # todo - once the file paths have been selected, move to single folder
-    # todo validate file types
-    # todo don't let upload same file multiple times
     a = Tk()
     a.rowconfigure(0, weight=1)
     a.columnconfigure(0, weight=1)
-    FilesUpload(a).grid(row=0, column=0, sticky="nsew")
+    FilesUpload(a, "test").grid(row=0, column=0, sticky="nsew")
     a.mainloop()
