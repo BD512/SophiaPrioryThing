@@ -19,7 +19,8 @@ class RecordDetailsEntry(Frame):
         Label(self, text="Category:").grid(row=1, column=0, padx=10, pady=(5, 0), sticky="nsew")
         self.category_menu = ttk.Combobox(self, values=self.categories)
         self.category_menu.grid(row=1, column=1, padx=10, pady=0, sticky="nsew")
-        self.category_menu.bind('<<ComboboxSelected>>', self.updateSubcategoryMenu)
+        self.category_menu.bind('<<ComboboxSelected>>', self.update_subcategory_menu)
+        self.category_menu.bind('<Button-1>', self.clear_category_menu)
         self.category_menu.set("Miscellaneous" if category is None else category)
 
         self.category_dict = category_dict # self.database.get_category_dict(self.categories)
@@ -30,8 +31,8 @@ class RecordDetailsEntry(Frame):
         self.subcategory_menu = ttk.Combobox(self, values=self.category_dict[
             "Miscellaneous"] if subcategory is None else subcategory)  # default selection is miscellaneous
         self.subcategory_menu.grid(row=2, column=1, padx=10, pady=10, sticky="nsew")
-        self.subcategory_menu.bind('<FocusIn>', self.updateSubcategoryMenu)
-        self.subcategory_menu.bind('<Button-1>', self.updateSubcategoryMenu)
+        #self.subcategory_menu.bind('<FocusIn>', self.update_subcategory_menu)
+        self.subcategory_menu.bind('<Button-1>', self.update_subcategory_menu)
 
         Label(self, text="Description:").grid(row=3, column=0, padx=10, pady=(5, 0), sticky="nsew")
         self.description_entry = Text(self, wrap="word", width=4, height=4)
@@ -55,23 +56,27 @@ class RecordDetailsEntry(Frame):
     def getName(self) -> str:
         return self.name_entry.get().title()
 
-    def getCategory(self) -> str:
+    def get_category(self) -> str:
         return self.category_menu.get().title()
 
-    def getSubcategory(self) -> str:
+    def get_subcategory(self) -> str:
         return self.subcategory_menu.get().title()
 
-    def getDescription(self) -> str:
+    def get_description(self) -> str:
         return self.description_entry.get("1.0", "end-1c").capitalize()
 
-    def getYear(self) -> str:
+    def get_year(self) -> str:
         return self.year_entry.get()
 
-    def getConfidence(self) -> bool:
+    def get_confidence(self) -> bool:
         return bool(
             self.confidence_level.get())  # doesn't need to be validated so can be cast in the getter, unlike year
 
-    def updateSubcategoryMenu(self, event):
+    def clear_category_menu(self, event):
+        self.category_menu.set("")
+
+    def update_subcategory_menu(self, event):
+        self.subcategory_menu.set("")
         current_category = self.category_menu.get()
         if current_category in self.category_dict.keys():
             self.subcategory_menu.config(values=self.category_dict[current_category])
@@ -114,15 +119,15 @@ class RecordDetailsWindow(Toplevel):
     def get_item_details_for_record(self) -> tuple[
         str, str, str, int, bool]:  # returns all current item info but not the overall category, also, casts the year to be an integer as it's already been validated before now so won't cause a ValueError
         try:
-            return self.record_entry.getName(), self.record_entry.getSubcategory(), self.record_entry.getDescription(), int(
-                self.record_entry.getYear()), self.record_entry.getConfidence()
+            return self.record_entry.getName(), self.record_entry.get_subcategory(), self.record_entry.get_description(), int(
+                self.record_entry.get_year()), self.record_entry.get_confidence()
         except ValueError:
-            return self.record_entry.getName(), self.record_entry.getSubcategory(), self.record_entry.getDescription(), -1, self.record_entry.getConfidence()
+            return self.record_entry.getName(), self.record_entry.get_subcategory(), self.record_entry.get_description(), -1, self.record_entry.get_confidence()
 
     def get_all_item_details_for_validation(self) -> list[
         str|bool]:  # returns all item details, including the larger category
-        return [self.record_entry.getName(), self.record_entry.getSubcategory(), self.record_entry.getCategory(), self.record_entry.getDescription(), self.record_entry.getYear(),
-                self.record_entry.getConfidence()]
+        return [self.record_entry.getName(), self.record_entry.get_subcategory(), self.record_entry.get_category(), self.record_entry.get_description(), self.record_entry.get_year(),
+                self.record_entry.get_confidence()]
 
     def get_database_categories(self):
         return self.database.get_categories()
@@ -173,7 +178,8 @@ class RecordDetailsWindow(Toplevel):
         # with beth's edits, i swear now the categories being used inside some of these classes aren't updated as categories are added because they're attributes instead of getters? idk check this
 
     def is_new_category(self) -> bool:  # method to return whether or not the current category is new
-        if self.record_entry.getCategory() not in self.get_database_categories():
+        print(self.record_entry.get_category(), self.get_database_categories())
+        if self.record_entry.get_category() not in self.get_database_categories():
             print("new category")
             return True
         print("old category")
@@ -182,7 +188,7 @@ class RecordDetailsWindow(Toplevel):
     def is_new_subcategory(self) -> bool:  # method to check if the current subcategory already exists
         # print(self.get_subcategory(), self.database.get_subcategories())
         # print(self.get_subcategory() not in self.database.get_subcategories())
-        if self.record_entry.getSubcategory() not in self.get_database_subcategories():
+        if self.record_entry.get_subcategory() not in self.get_database_subcategories():
             print("new subcategory")
             return True
         print("old subcategory")
@@ -193,7 +199,7 @@ class RecordDetailsWindow(Toplevel):
         print("updating category")
         if self.is_new_category():
             if self.is_new_subcategory():
-                self.database.insert_into_category(self.record_entry.getSubcategory(), self.record_entry.getCategory(), None)
+                self.database.insert_into_category(self.record_entry.get_subcategory(), self.record_entry.get_category(), None)
                 return True
 
             else:  # cannot have duplicate subcategories even with different categories - subcategories must be unique
@@ -201,7 +207,7 @@ class RecordDetailsWindow(Toplevel):
                 return False
 
         elif self.is_new_subcategory():
-            self.database.insert_into_category(self.record_entry.getSubcategory(), self.record_entry.getCategory(),
+            self.database.insert_into_category(self.record_entry.get_subcategory(), self.record_entry.get_category(),
                                                None)  # subcategory description is currently None - maybe instead could have something appear for sophia to add description
             return True
 
