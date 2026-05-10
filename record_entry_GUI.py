@@ -4,11 +4,11 @@ from datetime import date
 from ImagesUpload import FilesUpload
 
 class RecordDetailsEntry(Frame):
-    def __init__(self, master, categories: tuple, category_dict: dict, name: str="", description: str="", category: str=None, subcategory: str=None, year: int=None):
+    def __init__(self, master, categories: tuple, category_dict: dict, name: str="", description: str="", category: str=None, subcategory: str=None, year: int=None, confidence: int=0):
         super().__init__(master)
         self.grid_rowconfigure((0, 1, 2, 3, 4, 5, 6), weight=1)
         self.grid_columnconfigure((0, 1, 2), weight=1)
-        self.confidence_level = IntVar()
+        self.confidence_level = IntVar(value=confidence)
         self.categories = categories
 
         Label(self, text="Item name:").grid(row=0, column=0, padx=10, pady=(5, 0), sticky="nsew")
@@ -40,7 +40,7 @@ class RecordDetailsEntry(Frame):
 
         Label(self, text="Year:").grid(row=4, column=0, padx=10, pady=(5, 0))
         self.year_entry = Entry(self)
-        if year is not None: self.description_entry.insert(0, str(year))
+        if year is not None: self.year_entry.insert(0, str(year))
         self.year_entry.grid(row=4, column=1, padx=10, pady=0)
 
         # Label(self, text="Year confidence:").grid(row=0, column=4, padx=(5,0), pady=10)
@@ -79,7 +79,7 @@ class RecordDetailsEntry(Frame):
             self.subcategory_menu.config(values=[])
 
 class RecordDetailsWindow(Toplevel):
-    def __init__(self, master, database_manager: DatabaseManager, name: str="", description: str="", category: str=None, subcategory: str=None, year: int=None):
+    def __init__(self, master, database_manager: DatabaseManager, name: str="", description: str="", category: str=None, subcategory: str=None, year: int=None, confidence: int=0):
         super().__init__(master)
         self.grid_rowconfigure((0, 1), weight=1)
         self.grid_columnconfigure((0, 1), weight=1)
@@ -89,7 +89,7 @@ class RecordDetailsWindow(Toplevel):
 
         categories = self.database.get_categories()
         self.record_entry = RecordDetailsEntry(self, self.database.get_categories(),
-                                               self.database.get_category_dict(categories), name, description, category, subcategory, year)
+                                               self.database.get_category_dict(categories), name, description, category, subcategory, year, confidence)
         self.record_entry.grid(row=0, column=0, columnspan=2, sticky="nsew")
         self.action_btn = Button(self, text="Enter", command=self.enter_item)  # the final submit button
 
@@ -168,18 +168,9 @@ class RecordDetailsWindow(Toplevel):
             return False
 
         # TODO:
-        # add more validation? did i miss anything? it's 1:30am so i probably did
-        # check what's happening with year validation - is this right?
-        # is anything else allowed to be "", is anything ive allowed to be "" not actually allowed to be ""
-        # AM i correct that all subcategories must be unique regardless of category?
-        # is me casting confidence from an int to a bool unnecessary? just bc i noticed in database manager it's default value is an int
-        # what's happening with images?
-
         # need option of adding a subcategory's description somewhere at some point yes yes
-        # lol i haven't tested this at allllllllllllllllll
-        # need to add method to database manager to get categories instead of having that hard-coded tuple in the initialisation of this toplevel
 
-
+        # with beth's edits, i swear now the categories being used inside some of these classes aren't updated as categories are added because they're attributes instead of getters? idk check this
 
     def is_new_category(self) -> bool:  # method to return whether or not the current category is new
         if self.record_entry.getCategory() not in self.get_database_categories():
@@ -238,12 +229,20 @@ class AddItemWindow(RecordDetailsWindow):
 
 
 class EditItemWindow(RecordDetailsWindow):
-    def __init__(self, master, database_manager: DatabaseManager, last_item_id):
+    def __init__(self, master, database_manager: DatabaseManager, item_id):
         # todo get information of name of last item etc from database using item id
-        super().__init__(master, database_manager) # todo pass information got from database in as parameter here
+        # self.item_id = item_id
+        self.database = database_manager
+        self.item_details = self.database.get_item_from_id(item_id) # id, name, subcategory, description, year, confidence
+        print(self.item_details)
+        d = self.get_item_details_to_fill()
+        super().__init__(master, database_manager, d[0], d[1], d[2], d[3], d[4], d[5]) # todo pass information got from database in as parameter here
         self.change_button_text("Edit item")
-        self.last_item_id = last_item_id
-
+        # name: str="", description: str="", category: str=None, subcategory: str=None, year: int=None, confidence):
+    def get_item_details_to_fill(self) -> tuple:
+        d = self.item_details
+        category = self.database.get_category(d[2])
+        return d[1], d[3], category, d[2], d[4], d[5]
     def enter_item(self):
         if self.is_valid_record():
             details = self.get_item_details_for_record()
@@ -255,4 +254,5 @@ class EditItemWindow(RecordDetailsWindow):
 
 a = Tk()
 entry = AddItemWindow(a, DatabaseManager())
+edit = EditItemWindow(a, DatabaseManager(),10)
 a.mainloop()

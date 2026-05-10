@@ -136,6 +136,11 @@ class DatabaseManager:
     def get_id_number(self,name):
         self.cursor.execute(f"SELECT IDNumber FROM {self.item_table} WHERE IDNumber=?",(name,))
         return self.cursor.fetchone()[0]
+    
+    # method to return tuple of details about an item from it's unique ID number
+    def get_item_from_id(self,item_id) -> tuple:
+        self.cursor.execute(f"SELECT * FROM {self.item_table} WHERE IDNumber=?",(item_id,))
+        return self.cursor.fetchall()[0]
         
     def get_categories(self) -> tuple: # returns a tuple of all categories
         categories = self.get_column(f"{self.category_table}","Category")
