@@ -89,6 +89,7 @@ class DatabaseManager:
         # print(f"{name},{subcategory},{description},{year},{confidence}")
         self.cursor.execute(f"INSERT INTO {self.item_table} {column_names} \
                             VALUES (?, ?, ?, ?, ?);", (name, subcategory, description, year, confidence))
+        print("should be adding it tp the table?")
         self.conn.commit() # updates changes
 
     # method to insert a new record into matching category table
@@ -133,7 +134,7 @@ class DatabaseManager:
 
     # method to return id number of first item with that name
     def get_id_number(self,name):
-        self.cursor.execute(f"SELECT IDNumber FROM {self.item_table} WHERE Name=?",(name,))
+        self.cursor.execute(f"SELECT IDNumber FROM {self.item_table} WHERE IDNumber=?",(name,))
         return self.cursor.fetchone()[0]
         
     def get_categories(self) -> tuple: # returns a tuple of all categories
@@ -188,7 +189,7 @@ class DatabaseManager:
             ORDER BY {order_by} IS NULL, {order_by} {order}
             """)
         self.cursor.execute(f"""
-            SELECT Name, Subcategory,
+            SELECT {self.item_table}.IDNumber, Name, Subcategory,
             CASE 
                 WHEN Confidence = 1 THEN Year 
                 ELSE "c. " || Year 
@@ -207,45 +208,80 @@ class DatabaseManager:
         self.cursor.execute(f"DROP TABLE {self.category_table};")
         self.conn.commit()
 
+    def create_subcategory(self, subcategory, category):
+        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",
+                            (subcategory, category))
+        self.conn.commit()
+
     def create_subcategories(self):
         # category S
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Ancient Stalls","Stalls"))
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Bishop Stalls","Stalls"))
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Sedilia","Stalls"))
+        self.create_subcategory("Ancient Stalls","Stalls")
+        self.create_subcategory("Bishop Stalls","Stalls")
+        self.create_subcategory("Sedilia","Stalls")
+        # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Ancient Stalls","Stalls"))
+        # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Bishop Stalls","Stalls"))
+        # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Sedilia","Stalls"))
         # category L
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Chalice","Liturgical Items"))
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Ciborium","Liturgical Items"))
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Collection Plate","Liturgical Items"))
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Flagon","Liturgical Items"))
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Paten","Liturgical Items"))
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Thurible","Liturgical Items"))
+        self.create_subcategory("Chalice","Liturgical Items")
+        self.create_subcategory("Ciborium","Liturgical Items")
+        self.create_subcategory("Collection Plate","Liturgical Items")
+        self.create_subcategory("Flagon","Liturgical Items")
+        self.create_subcategory("Paten","Liturgical Items")
+        self.create_subcategory("Thurible", "Liturgical Items")
+        # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Chalice","Liturgical Items"))
+        # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Ciborium","Liturgical Items"))
+        # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Collection Plate","Liturgical Items"))
+        # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Flagon","Liturgical Items"))
+        # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Paten","Liturgical Items"))
+        # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Thurible","Liturgical Items"))
         # category CS
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Coptic Crosses","Crosses and Staves"))
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Processional Crosses","Crosses and Staves"))
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Crucifixes","Crosses and Staves"))
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Churchwarden Staves","Crosses and Staves"))
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Verges","Crosses and Staves"))
+        self.create_subcategory("Coptic Crosses","Crosses and Staves")
+        self.create_subcategory("Processional Crosses","Crosses and Staves")
+        self.create_subcategory("Crucifixes","Crosses and Staves")
+        self.create_subcategory("Churchwarden Staves","Crosses and Staves")
+        self.create_subcategory("Verges","Crosses and Staves")
+        # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Coptic Crosses","Crosses and Staves"))
+        # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Processional Crosses","Crosses and Staves"))
+        # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Crucifixes","Crosses and Staves"))
+        # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Churchwarden Staves","Crosses and Staves"))
+        # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Verges","Crosses and Staves"))
         # category P
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Pulpit","Pulpit and Lecturn"))
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Lecturn","Pulpit and Lecturn"))
+        self.create_subcategory("Pulpit","Pulpit and Lecturn")
+        self.create_subcategory("Lecturn","Pulpit and Lecturn")
+        # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Pulpit","Pulpit and Lecturn"))
+        # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Lecturn","Pulpit and Lecturn"))
         # category W
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Regimental Chapel","Stained Glass Windows"))
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Main Church","Stained Glass Windows"))
+        self.create_subcategory("Regimental Chapel","Stained Glass Windows")
+        self.create_subcategory("Main Church","Stained Glass Windows")
+        # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Regimental Chapel","Stained Glass Windows"))
+        # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Main Church","Stained Glass Windows"))
         # category E
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Altar Frontals - High Altar","Embroidery"))
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Altar Frontals - Other","Embroidery"))
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Hassocks","Embroidery"))
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Copes","Embroidery"))
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Chasubles","Embroidery"))
+        self.create_subcategory("Altar Frontals - High Altar","Embroidery")
+        self.create_subcategory("Altar Frontals - Other","Embroidery")
+        self.create_subcategory("Hassocks","Embroidery")
+        self.create_subcategory("Copes","Embroidery")
+        self.create_subcategory("Chasubles","Embroidery")
+        # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Altar Frontals - High Altar","Embroidery"))
+        # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Altar Frontals - Other","Embroidery"))
+        # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Hassocks","Embroidery"))
+        # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Copes","Embroidery"))
+        # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Chasubles","Embroidery"))
         # category LC
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Chandeliers","Lighting and Candles"))
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Altar Candles","Lighting and Candles"))
+        self.create_subcategory("Chandeliers","Lighting and Candles")
+        self.create_subcategory("Altar Candles","Lighting and Candles")
+        # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Chandeliers","Lighting and Candles"))
+        # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Altar Candles","Lighting and Candles"))
         # category M
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Baptismal Fonts","Miscellaneous"))
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Icons","Miscellaneous"))
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Statues","Miscellaneous"))
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Wooden Chests","Miscellaneous"))
-        self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Aumbry","Miscellaneous"))
+        self.create_subcategory("Baptismal Fonts","Miscellaneous")
+        self.create_subcategory("Icons","Miscellaneous")
+        self.create_subcategory("Statues","Miscellaneous")
+        self.create_subcategory("Wooden Chests","Miscellaneous")
+        self.create_subcategory("Aumbry","Miscellaneous")
+        # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Baptismal Fonts","Miscellaneous"))
+        # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Icons","Miscellaneous"))
+        # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Statues","Miscellaneous"))
+        # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Wooden Chests","Miscellaneous"))
+        # self.cursor.execute(f"INSERT INTO {self.category_table} (Subcategory,Category) VALUES (?,?);",("Aumbry","Miscellaneous"))
 
     def delete_record(self,id):
         self.cursor.execute(f"DELETE FROM {self.item_table} WHERE IDNumber =?",(id,))
