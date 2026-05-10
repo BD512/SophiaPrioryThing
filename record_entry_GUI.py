@@ -225,7 +225,7 @@ class AddItemWindow(RecordDetailsWindow):
                 self.database.insert_into_item(details[0], details[1], details[2], details[3], details[4])
             else:  # enforce not being confident about the year if no year has been entered
                 self.database.insert_into_item(details[0], details[1], details[2], details[3], False)
-
+            self.destroy()
             # def insert_into_item(self,name="NULL",subcategory="MISC",description = "NULL",year=-1,confidence=0):
 
 
@@ -252,7 +252,7 @@ class EditItemWindow(RecordDetailsWindow):
                 self.database.edit_item_record(details[0], details[1], details[2], details[3], details[4])
             else:
                 self.database.edit_item_record(details[0], details[1], details[2], details[3], False)
-        self.destroy()
+            self.destroy()
 
 
 a = Tk()
