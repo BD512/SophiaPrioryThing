@@ -1,5 +1,5 @@
 from tkinter import Tk, Label, Entry, ttk, Text, IntVar, Button, Toplevel, Frame
-from database_manager import DatabaseManager
+from FinalSophiaCode.database_manager import DatabaseManager
 from datetime import date
 from ImagesUpload import FilesUpload
 

@@ -1,4 +1,4 @@
-from database_manager import DatabaseManager
+from FinalSophiaCode.database_manager import DatabaseManager
 from table import Table
 from tkinter import Tk, Button
 from record_entry_GUI import AddItemWindow
