@@ -254,8 +254,8 @@ class EditItemWindow(RecordDetailsWindow):
                 self.database.edit_item_record(details[0], details[1], details[2], details[3], False)
             self.destroy()
 
-
-a = Tk()
-entry = AddItemWindow(a, DatabaseManager())
-edit = EditItemWindow(a, DatabaseManager(),5)
-a.mainloop()
+if __name__ == "__main__":
+    a = Tk()
+    entry = AddItemWindow(a, DatabaseManager())
+    edit = EditItemWindow(a, DatabaseManager(),5)
+    a.mainloop()
