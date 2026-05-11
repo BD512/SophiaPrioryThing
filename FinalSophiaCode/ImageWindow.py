@@ -1,6 +1,6 @@
 from tkinter import PhotoImage, Toplevel, Button, Label, Frame, Tk
 
-from FinalSophiaCode.database_manager import DatabaseManager
+from database_manager import DatabaseManager
 
 class ImagesViewer(Frame):
     def __init__(self, master, photo_paths: list):
