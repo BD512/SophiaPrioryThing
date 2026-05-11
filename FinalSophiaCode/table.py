@@ -1,7 +1,7 @@
 from tkinter import ttk, Menu, Frame, TclError
 from functools import partial
 from record_entry_GUI import EditItemWindow
-from FinalSophiaCode.database_manager import DatabaseManager
+from database_manager import DatabaseManager
 from ImageWindow import ImagesWindow
 
 class HistoricItems(list):
