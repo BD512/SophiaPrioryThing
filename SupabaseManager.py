@@ -44,9 +44,11 @@ class PrioryDbManager(SupabaseManager):
             .execute()
         )
 
+    def insertImagesForEntry(self, id_number: int, paths: list[str]):
+        for image_path in paths:
+            self.insertIntoImageTable(id_number, image_path)
 
-
-    def insertIntoItem(self, name: str, subcategory: str, category: str, description: str|None = None,year=None,confidence: int=0, images: list=None):
+    def insertIntoItem(self, name: str, subcategory: str, category: str, description: str|None = None,year=None,confidence: int=0, images: list=None) -> None:
         info_dict = {"Name": name,
                      "Subcategory": subcategory,
                      "Category": category,
@@ -54,8 +56,13 @@ class PrioryDbManager(SupabaseManager):
                      }
         if description is not None: info_dict["Description"] = description
         if year is not None: info_dict["Year"] = year
-
-
+        response = (
+            self.client.table(self.item_table)
+            .insert(info_dict)
+            .execute()
+        )
+        id_number = response.data[0]["IDNumber"]
+        self.insertImagesForEntry(id_number, images)
 
 
 
