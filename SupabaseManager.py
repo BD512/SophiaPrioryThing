@@ -65,21 +65,13 @@ class PrioryDbManager(SupabaseManager):
         self.insertImagesForEntry(id_number, images)
 
     def edit_item_record(self,item_id,name:str|None=None,subcategory="MISC",description:str|None = None,year=-1,confidence: int=0, images: list=None):
-        # print("editing item record")
-        # print(name)
-        if year < 0: year = None # years in AD must be positive
-        if description == "": description = None
-        # print(f"{name},{subcategory},{description},{year},{confidence}")
-        self.cursor.execute(f"UPDATE {self.item_table} SET Name=?, Subcategory=?, Description=?, Year=?, Confidence=? \
-                            WHERE IDNumber=?;", (name,subcategory,description,year,confidence,item_id,),)
-        self.conn.commit() # updates changes
-        self.delete_images_for_item(item_id)
-        if images is not None: self.add_images_for_item(item_id, images)
+
         info_dict = {
             "Name": name,
             "Subcategory": subcategory,
-            "Confidence": bool(confidence)
+            "Confident": bool(confidence)
         }
+
         if description is not None: info_dict["Description"] = description
         if year is not None: info_dict["Year"] = year
         response = (
