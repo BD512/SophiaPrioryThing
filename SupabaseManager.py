@@ -1,5 +1,6 @@
 from supabase import create_client, Client
 # documentation for supabase: https://supabase.com/docs/reference/python/
+# documentation for postegresql: https://www.postgresql.org/docs/
 
 class SupabaseManager:
     def __init__(self, url: str, key: str):
@@ -22,7 +23,7 @@ class SupabaseManager:
 
 class PrioryDbManager(SupabaseManager):
     def __init__(self, item_table="tblHistoricalItem",image_table="tblItemImage",category_table="tblMatchingCategory"):
-        super().__init__("https://ynrxfhpltaivjwbfsufa.supabase.co", "sb_publishable_Z-TIgzIUXW7La2XHy5upVg_DvLV0sKG")
+        super().__init__("https://ynrxfhpltaivjwbfsufa.supabase.co", "a secret key")
         self.item_table = item_table
         self.image_table = image_table
         self.category_table = category_table
@@ -37,6 +38,32 @@ class PrioryDbManager(SupabaseManager):
         )
         return result.data
 
+    def getCategories(self):
+        return self.getColumnFromCategoryTable("Category")
+
+    def getSubCategories(self):
+        return self.getColumnFromCategoryTable("Subcategory")
+
+    def getCategoryDict(self):
+        result = (
+            self.client.rpc(
+                "get_category_dict",
+                {}
+            )
+            .execute()
+        )
+        print(result) # todo change to give dict
+
+    def doesSubCategoryExist(self, category: str, subcategory: str) -> bool:
+        result = (
+            self.client.rpc(
+                "is_subcategory",
+                {"category": category, "subcategory": subcategory}
+            )
+            .execute()
+        )
+        return bool(result.data)
+
     def insertIntoImageTable(self, id_number: int, path: str):
         response = (
             self.client.table(self.image_table)
@@ -44,15 +71,22 @@ class PrioryDbManager(SupabaseManager):
             .execute()
         )
 
+    def insertIntoCategories(self, category: str, subcategory: str): # works
+        response = (
+            self.client.table(self.category_table)
+            .insert({"Category": category, "Subcategory": subcategory})
+            .execute()
+        )
+
     def insertImagesForEntry(self, id_number: int, paths: list[str]):
         for image_path in paths:
             self.insertIntoImageTable(id_number, image_path)
 
-    def insertIntoItem(self, name: str, subcategory: str, category: str, description: str|None = None,year=None,confidence: int=0, images: list=None) -> None:
+    def insertIntoItem(self, name: str, category: str, subcategory: str, description: str|None = None,year: int|None=None,confidence: int=0, images: list=None) -> None:
         info_dict = {"Name": name,
                      "Subcategory": subcategory,
                      "Category": category,
-                     "Confidence": bool(confidence),
+                     "Confident": bool(confidence),
                      }
         if description is not None: info_dict["Description"] = description
         if year is not None: info_dict["Year"] = year
@@ -64,14 +98,12 @@ class PrioryDbManager(SupabaseManager):
         id_number = response.data[0]["IDNumber"]
         self.insertImagesForEntry(id_number, images)
 
-    def edit_item_record(self,item_id,name:str|None=None,subcategory="MISC",description:str|None = None,year=-1,confidence: int=0, images: list=None):
-
-        info_dict = {
-            "Name": name,
-            "Subcategory": subcategory,
-            "Confident": bool(confidence)
-        }
-
+    def editItemRecord(self, item_id, name: str|None=None, category: str=None, subcategory: str=None, description: str|None=None, year: int|None=None, confidence: int=None, images: list=None) -> None:
+        info_dict = {}
+        if name is not None: info_dict["Name"] = name
+        if category is not None: info_dict["Category"] = category
+        if subcategory is not None: info_dict["Subcategory"] = subcategory
+        if confidence is not None: info_dict["Confident"] = bool(confidence)
         if description is not None: info_dict["Description"] = description
         if year is not None: info_dict["Year"] = year
         response = (
@@ -84,5 +116,6 @@ class PrioryDbManager(SupabaseManager):
 
 a = PrioryDbManager()
 # a.createDatabase()
-print(a.getColumnFromCategoryTable("Category"))
+a.insertIntoCategories("cross", "idk")
+# print(a.insertIntoItem("cross", "crosses", "idk", "a cross"))
 
