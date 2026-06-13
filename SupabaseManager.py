@@ -23,7 +23,7 @@ class SupabaseManager:
 
 class PrioryDbManager(SupabaseManager):
     def __init__(self, item_table="tblHistoricalItem",image_table="tblItemImage",category_table="tblMatchingCategory"):
-        super().__init__("https://ynrxfhpltaivjwbfsufa.supabase.co", "a secret key")
+        super().__init__("url", "key")
         self.item_table = item_table
         self.image_table = image_table
         self.category_table = category_table
